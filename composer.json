@@ -1,0 +1,18 @@
+{
+    "name": "stefmachine/validation",
+    "description": "Simple validation package for PHP",
+    "authors": [
+        {
+            "name": "Stéphane Godin",
+            "email": "stephanegodin@outlook.com"
+        }
+    ],
+    "require": {
+        "php": "^7.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "Stefmachine\\Validation\\": "src/"
+        }
+    }
+}

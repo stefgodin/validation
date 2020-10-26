@@ -15,3 +15,5 @@
 - Unit tests
 
 - Documentation
+
+- License (open-source?)

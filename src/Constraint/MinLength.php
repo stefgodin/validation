@@ -6,6 +6,7 @@ namespace Stefmachine\Validation\Constraint;
 
 use Stefmachine\Validation\ConstraintInterface;
 use Stefmachine\Validation\Errors;
+use Stefmachine\Validation\Helper\ErrorMaker;
 
 class MinLength implements ConstraintInterface
 {
@@ -29,7 +30,7 @@ class MinLength implements ConstraintInterface
         $length = strlen((string) $_value);
         
         if($length < $this->min){
-            return Errors::from(self::ERROR_MIN_LENGTH);
+            return Errors::from(ErrorMaker::makeError(self::ERROR_MIN_LENGTH, ['min' => $this->min]));
         }
         
         return Errors::none();

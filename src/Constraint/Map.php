@@ -54,7 +54,7 @@ class Map implements ConstraintInterface
     
                 $errors->merge(
                     $this->constraints[$key]->validate($value),
-                    "{$key}:"
+                    "{$key}."
                 );
             }
             elseif (!$this->allowExtra){
@@ -65,7 +65,7 @@ class Map implements ConstraintInterface
         foreach ($missingKeys as $key){
             $errors->merge( // Giving null to trigger validations
                 $this->constraints[$key]->validate(null),
-                "{$key}:"
+                "{$key}."
             );
         }
         

@@ -6,6 +6,7 @@ namespace Stefmachine\Validation\Constraint;
 
 use Stefmachine\Validation\ConstraintInterface;
 use Stefmachine\Validation\Errors;
+use Stefmachine\Validation\Helper\ErrorMaker;
 
 class Max implements ConstraintInterface
 {
@@ -26,7 +27,7 @@ class Max implements ConstraintInterface
         }
         
         if($_value > $this->max){
-            return Errors::from(self::ERROR_MAX);
+            return Errors::from(ErrorMaker::makeError(self::ERROR_MAX, ['max' => $this->max]));
         }
         
         return Errors::none();

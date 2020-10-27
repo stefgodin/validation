@@ -6,6 +6,7 @@ namespace Stefmachine\Validation\Constraint;
 
 use Stefmachine\Validation\ConstraintInterface;
 use Stefmachine\Validation\Errors;
+use Stefmachine\Validation\Helper\ErrorMaker;
 
 class MimeType implements ConstraintInterface
 {
@@ -26,7 +27,7 @@ class MimeType implements ConstraintInterface
         }
         
         if($this->mimeType != mime_content_type($_value)){
-            return Errors::from(self::ERROR_MIME_TYPE);
+            return Errors::from(ErrorMaker::makeError(self::ERROR_MIME_TYPE, ['mime' => $this->mimeType]));
         }
         
         return Errors::none();

@@ -6,6 +6,7 @@ namespace Stefmachine\Validation\Constraint;
 
 use Stefmachine\Validation\ConstraintInterface;
 use Stefmachine\Validation\Errors;
+use Stefmachine\Validation\Helper\ErrorMaker;
 
 class MaxLength implements ConstraintInterface
 {
@@ -28,7 +29,7 @@ class MaxLength implements ConstraintInterface
         $length = strlen((string) $_value);
         
         if($length > $this->max){
-            return Errors::from(self::ERROR_MAX_LENGTH);
+            return Errors::from(ErrorMaker::makeError(self::ERROR_MAX_LENGTH, ['max' => $this->max]));
         }
         
         return Errors::none();

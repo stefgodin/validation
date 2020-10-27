@@ -6,6 +6,7 @@ namespace Stefmachine\Validation\Constraint;
 
 use Stefmachine\Validation\ConstraintInterface;
 use Stefmachine\Validation\Errors;
+use Stefmachine\Validation\Helper\ErrorMaker;
 
 class MaxCount implements ConstraintInterface
 {
@@ -26,7 +27,7 @@ class MaxCount implements ConstraintInterface
         }
         
         if(count($_value) > $this->maxCount){
-            return Errors::from(self::ERROR_MAX_COUNT);
+            return Errors::from(ErrorMaker::makeError(self::ERROR_MAX_COUNT, ['max' => $this->maxCount]));
         }
         
         return Errors::none();

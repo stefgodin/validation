@@ -34,7 +34,7 @@ class ErrorTranslator
             }
             
             if(!$found){
-                $translatedList[$error] = $error; // Leave error as is
+                $translatedList[$parsedError['id']] = $parsedError['id']; // Leave error as is
             }
         }
         

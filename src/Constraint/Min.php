@@ -6,6 +6,7 @@ namespace Stefmachine\Validation\Constraint;
 
 use Stefmachine\Validation\ConstraintInterface;
 use Stefmachine\Validation\Errors;
+use Stefmachine\Validation\Helper\ErrorMaker;
 
 class Min implements ConstraintInterface
 {
@@ -26,7 +27,7 @@ class Min implements ConstraintInterface
         }
         
         if($_value < $this->min){
-            return Errors::from(self::ERROR_MIN);
+            return Errors::from(ErrorMaker::makeError(self::ERROR_MIN, ['min' => $this->min]));
         }
         
         return Errors::none();

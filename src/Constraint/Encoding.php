@@ -6,6 +6,7 @@ namespace Stefmachine\Validation\Constraint;
 
 use Stefmachine\Validation\ConstraintInterface;
 use Stefmachine\Validation\Errors;
+use Stefmachine\Validation\Helper\ErrorMaker;
 
 class Encoding implements ConstraintInterface
 {
@@ -30,7 +31,7 @@ class Encoding implements ConstraintInterface
         }
         
         if(!mb_check_encoding($_value, $this->encoding)){
-            return Errors::from(self::ERROR_ENCODING);
+            return Errors::from(ErrorMaker::makeError(self::ERROR_ENCODING, ['encoding' => $this->encoding]));
         }
         
         return Errors::none();

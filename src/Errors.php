@@ -4,6 +4,9 @@
 namespace Stefmachine\Validation;
 
 
+use Stefmachine\Validation\Helper\ErrorMatcher;
+use Stefmachine\Validation\Helper\ErrorParser;
+
 class Errors implements \IteratorAggregate, \Countable
 {
     protected $errors;
@@ -44,7 +47,9 @@ class Errors implements \IteratorAggregate, \Countable
             throw new \InvalidArgumentException("Error must contain at least one character.");
         }
         
-        $this->errors[] = $_error;
+        if(!in_array($_error, $this->errors)){
+            $this->errors[] = $_error;
+        }
         return $this;
     }
     
@@ -56,9 +61,18 @@ class Errors implements \IteratorAggregate, \Countable
         return $this->errors;
     }
     
-    public function has(string $_error): bool
+    /**
+     * @param string $_search
+     * @param ErrorMatcher|string $_matcher
+     * @return bool
+     */
+    public function has(string $_search, string $_matcher = ErrorMatcher::class): bool
     {
-        return in_array($_error, $this->errors);
+        return count(
+            array_filter($this->errors, function($error) use($_search, $_matcher){
+                $_matcher::matches($error, $_search);
+            })
+        ) > 0;
     }
     
     public function merge(Errors $_errors, string $_prefix = ''): Errors
@@ -68,6 +82,11 @@ class Errors implements \IteratorAggregate, \Countable
         }
         
         return $this;
+    }
+    
+    public function toArray(): array
+    {
+        return $this->errors;
     }
     
     public function getIterator()

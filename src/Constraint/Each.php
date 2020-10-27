@@ -39,7 +39,7 @@ class Each implements ConstraintInterface
             foreach ($this->constraints as $constraint){
                 $errors->merge(
                     $constraint->validate($value),
-                    "{$index}:"
+                    "{$index}."
                 );
                 
                 break;

@@ -105,6 +105,11 @@ abstract class Assert
         return self::Length($_length, $_length);
     }
     
+    public static function Regex(string $_regex)
+    {
+        return new Regex($_regex);
+    }
+    
     public static function Min(int $_min)
     {
         return new Min($_min);
@@ -112,7 +117,7 @@ abstract class Assert
     
     public static function Max(int $_max)
     {
-        return new Map($_max);
+        return new Max($_max);
     }
     
     public static function Range(int $_min, int $_max)

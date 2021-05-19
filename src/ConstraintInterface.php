@@ -4,7 +4,14 @@
 namespace Stefmachine\Validation;
 
 
+use UnexpectedValueException;
+
 interface ConstraintInterface
 {
-    public function validate($_value): Errors;
+    /**
+     * @param $_value
+     * @return bool|string
+     * @throws UnexpectedValueException
+     */
+    public function validate($_value);
 }

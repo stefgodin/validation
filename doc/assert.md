@@ -1,58 +1,63 @@
 # Assert class
-The Assert class is a container for every implemented validation.
+The Assert class is a container for every implemented validation and some mixins.
 
 Here is a basic usage example:
 ```php
 $value = 'This is right';
-$errors = Assert::Length(1, 16)->validate($value);
+$valid = Assert::Length(1, 16)->validate($value);
 
-if($errors->any()){
+if(!$valid){
     // The validation failed...
+}
+
+$errorMessage = Assert::Length(1, 16, 'Value is of the wrong length.')->validate($value);
+
+if($errorMessage !== true){
+    // The validation failed...
+    echo $errorMessage; // Value is of the wrong length.
 }
 ```
 
 Some validations allow for more complex constructs such as associative arrays.
 ```php
 $value = array(
-    'foo' => 'hello'
+    'foo' => 'hello',
     'bar' => 4
 );
-$errors = Assert::map([
+$valid = Assert::map([
     'foo' => Assert::Required(),
     'bar' => Assert::Range(0, 5)
 ])->validate($value);
 
-if($errors->any()){
+if(!$valid){
     // The validation failed...
 }
 ```
-
-The ::map validation is an example of combined validations.
 
 Here are some others:
 ```php
 
 $value = 4;
-$errors = Assert::AllOf([
+$valid = Assert::AllOf([
     Assert::Required(),
     Assert::Numeric(),
     Assert::Range(0, 5)
 ])->validate($value);
 // Every validation needs to succeed
 
-if($errors->any()){
+if(!$valid){
     // The validation failed...
 }
 ```
 ```php
 $value = 23;
-$errors = Assert::OneOf([
+$valid = Assert::AnyOf([
     Assert::Numeric(),
     Assert::String()
 ])->validate($value);
 // Only one validation needs to succeed
 
-if($errors->any()){
+if(!$valid){
     // The validation failed...
 }
 ```

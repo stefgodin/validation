@@ -4,35 +4,47 @@
 namespace Stefmachine\Validation\Constraint;
 
 
+use InvalidArgumentException;
+use Stefmachine\Validation\Constraint\Traits\ErrorMessageTrait;
 use Stefmachine\Validation\ConstraintInterface;
-use Stefmachine\Validation\Errors;
-use Stefmachine\Validation\Helper\ErrorMaker;
+use UnexpectedValueException;
 
 class MinLength implements ConstraintInterface
 {
-    const ERROR_MIN_LENGTH = 'min_length';
+    protected $minLength;
+    protected $multiBytes;
     
-    protected $min;
+    use ErrorMessageTrait;
     
-    public function __construct(int $_min)
+    public function __construct(int $_min, ?string $_errorMessage = null)
     {
+        if($_min < 0){
+            throw new InvalidArgumentException("Min length cannot be less than 0.");
+        }
         
-        $this->min = $_min;
+        $this->minLength = $_min;
+        $this->multiBytes = true;
+        $this->setErrorMessage($_errorMessage);
     }
     
-    public function validate($_value): Errors
+    public function singleByte(): MinLength
     {
-        $errors = Assert::String()->validate($_value);
-        if($errors->any()){
-            return $errors;
+        $this->multiBytes = false;
+        return $this;
+    }
+    
+    public function multiByte(): MinLength
+    {
+        $this->multiBytes = true;
+        return $this;
+    }
+    
+    public function validate($_value)
+    {
+        if(!is_string($_value)){
+            throw new UnexpectedValueException("Value is not a string.");
         }
-        
-        $length = strlen((string) $_value);
-        
-        if($length < $this->min){
-            return Errors::from(ErrorMaker::makeError(self::ERROR_MIN_LENGTH, ['min' => $this->min]));
-        }
-        
-        return Errors::none();
+    
+        return ($this->multiBytes ? mb_strlen($_value) : strlen($_value)) >= $this->minLength ?: $this->getError();
     }
 }

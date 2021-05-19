@@ -4,32 +4,31 @@
 namespace Stefmachine\Validation\Constraint;
 
 
+use Stefmachine\Validation\Constraint\Traits\ErrorMessageTrait;
 use Stefmachine\Validation\ConstraintInterface;
-use Stefmachine\Validation\Errors;
+use Stefmachine\Validation\ConstraintViolations;
 use Stefmachine\Validation\Helper\ErrorMaker;
+use UnexpectedValueException;
 
 class Min implements ConstraintInterface
 {
-    const ERROR_MIN = 'min';
-    
     protected $min;
     
-    public function __construct(int $_min)
+    use ErrorMessageTrait;
+    
+    public function __construct(int $_min, ?string $_errorMessage = null)
     {
         $this->min = $_min;
+        
+        $this->setErrorMessage($_errorMessage);
     }
     
-    public function validate($_value): Errors
+    public function validate($_value)
     {
-        $errors = Assert::Numeric()->validate($_value);
-        if($errors->any()){
-            return $errors;
+        if(!is_numeric($_value)){
+            throw new UnexpectedValueException("Value is not numeric.");
         }
         
-        if($_value < $this->min){
-            return Errors::from(ErrorMaker::makeError(self::ERROR_MIN, ['min' => $this->min]));
-        }
-        
-        return Errors::none();
+        return $_value >= $this->min ?: $this->getError();
     }
 }

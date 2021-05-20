@@ -10,184 +10,162 @@ abstract class Assert
 {
     private function __construct(){}
     
-    public static function Required()
+    public static function Required(?string $_errorMessage = null): NotNull
     {
-        return new NotNull();
+        return new NotNull($_errorMessage);
     }
     
-    public static function Optional(ConstraintInterface $_constraint)
+    public static function Optional(ConstraintInterface $_constraint, ?string $_errorMessage = null): Optional
     {
-        return new Optional($_constraint);
+        return new Optional($_constraint, $_errorMessage);
     }
     
-    public static function Choice(array $_choices, bool $_loose = false)
+    public static function Choice(array $_choices, ?string $_errorMessage = null): Choice
     {
-        return new Choice($_choices, $_loose);
+        return new Choice($_choices, $_errorMessage);
     }
     
-    public static function Equals($_value, bool $_loose = false)
+    public static function Equals($_value, ?string $_errorMessage = null): Choice
     {
-        return new Choice([$_value], $_loose);
+        return new Choice([$_value], $_errorMessage);
     }
     
-    public static function Email()
+    public static function Email(?string $_errorMessage = null): Email
     {
-        return new Email();
+        return new Email($_errorMessage);
     }
     
-    public static function Type(string $_type)
+    public static function Type(string $_type, ?string $_errorMessage = null): Type
     {
-        return new Type($_type);
+        return new Type($_type, $_errorMessage);
     }
     
-    public static function Boolean()
+    public static function Boolean(?string $_errorMessage = null): Type
     {
-        return self::Type('bool');
+        return self::Type(Type::BOOLEAN, $_errorMessage);
     }
     
-    public static function String(?string $_encoding = null)
+    public static function String(?string $_errorMessage = null): Type
     {
-        if($_encoding === null){
-            return self::Type('string');
-        }
-        
-        return Assert::AllOf([
-            Assert::String(),
-            Assert::Encoding($_encoding)
-        ]);
+        return self::Type(Type::STRING, $_errorMessage);
     }
     
-    public static function Double()
+    public static function Stringable(?string $_errorMessage = null): Type
     {
-        return self::Type('double');
+        return self::Type(Type::STRINGABLE, $_errorMessage);
     }
     
-    public static function Integer()
+    public static function Double(?string $_errorMessage = null): Type
     {
-        return self::Type('integer');
+        return self::Type(Type::DOUBLE, $_errorMessage);
     }
     
-    public static function Float()
+    public static function Integer(?string $_errorMessage = null): Type
     {
-        return self::Type('float');
+        return self::Type(Type::INTEGER, $_errorMessage);
     }
     
-    public static function Numeric()
+    public static function Float(?string $_errorMessage = null): Type
     {
-        return self::Type('numeric');
+        return self::Type(Type::FLOAT, $_errorMessage);
     }
     
-    public static function Array()
+    public static function Numeric(?string $_errorMessage = null): Type
     {
-        return self::Type('array');
+        return self::Type(Type::NUMERIC, $_errorMessage);
     }
     
-    public static function MinLength(int $_min)
+    public static function Array(?string $_errorMessage = null): Type
     {
-        return new MinLength($_min);
+        return self::Type(Type::ARRAY, $_errorMessage);
     }
     
-    public static function MaxLength(int $_max)
+    public static function Traversable(?string $_errorMessage = null): Type
     {
-        return new MaxLength($_max);
+        return self::Type(Type::TRAVERSABLE, $_errorMessage);
     }
     
-    public static function Length(int $_min, int $_max)
+    public static function Scalar(?string $_errorMessage = null): Type
+    {
+        return self::Type(Type::SCALAR, $_errorMessage);
+    }
+    
+    public static function MinLength(int $_min, ?string $_errorMessage = null): MinLength
+    {
+        return new MinLength($_min, $_errorMessage);
+    }
+    
+    public static function MaxLength(int $_max, ?string $_errorMessage = null): MaxLength
+    {
+        return new MaxLength($_max, $_errorMessage);
+    }
+    
+    public static function Length(int $_min, int $_max, ?string $_errorMessage = null): AllOf
     {
         return self::AllOf([
             self::MinLength($_min),
             self::MaxLength($_max)
-        ]);
+        ], $_errorMessage);
     }
     
-    public static function ExactLength(int $_length)
+    public static function Regex(string $_regex, ?string $_errorMessage = null): Regex
     {
-        return self::Length($_length, $_length);
+        return new Regex($_regex, $_errorMessage);
     }
     
-    public static function Regex(string $_regex)
+    public static function Min(int $_min, ?string $_errorMessage = null): Min
     {
-        return new Regex($_regex);
+        return new Min($_min, $_errorMessage);
     }
     
-    public static function Min(int $_min)
+    public static function Max(int $_max, ?string $_errorMessage = null): Max
     {
-        return new Min($_min);
+        return new Max($_max, $_errorMessage);
     }
     
-    public static function Max(int $_max)
-    {
-        return new Max($_max);
-    }
-    
-    public static function Range(int $_min, int $_max)
+    public static function Range(int $_min, int $_max, ?string $_errorMessage = null): AllOf
     {
         return self::AllOf([
             self::Min($_min),
             self::Max($_max)
-        ]);
+        ], $_errorMessage);
     }
     
-    public static function MinCount(int $_min)
+    public static function MinCount(int $_min, ?string $_errorMessage = null): MinCount
     {
-        return new MinCount($_min);
+        return new MinCount($_min, $_errorMessage);
     }
     
-    public static function MaxCount(int $_max)
+    public static function MaxCount(int $_max, ?string $_errorMessage = null): MaxCount
     {
-        return new MaxCount($_max);
+        return new MaxCount($_max, $_errorMessage);
     }
     
-    public static function ExactCount(int $_count)
+    public static function WithinCount(int $_min, int $_max, ?string $_errorMessage = null): AllOf
     {
         return Assert::AllOf([
-            Assert::MinCount($_count),
-            Assert::MaxCount($_count)
-        ]);
+            Assert::MinCount($_min),
+            Assert::MaxCount($_max)
+        ], $_errorMessage);
     }
     
-    public static function Map(array $_map = array())
+    public static function Map(array $_map, ?string $_errorMessage = null): Map
     {
-        return new Map($_map);
+        return new Map($_map, $_errorMessage);
     }
     
-    public static function Each(array $_constraints = array())
+    public static function Each(ConstraintInterface $_constraint, ?string $_errorMessage = null): Each
     {
-        return new Each($_constraints);
+        return new Each($_constraint, $_errorMessage);
     }
     
-    public static function AllOf(array $_constraints = array())
+    public static function AllOf(array $_constraints, ?string $_errorMessage = null): AllOf
     {
-        return self::XOf(count($_constraints), $_constraints);
+        return new AllOf($_constraints, $_errorMessage);
     }
     
-    public static function OneOf(array $_constraints = array())
+    public static function AnyOf(array $_constraints, ?string $_errorMessage = null): AnyOf
     {
-        return self::XOf(1, $_constraints);
-    }
-    
-    public static function XOf(int $_expects, array $_constraints = array())
-    {
-        return new XOf($_expects, $_constraints);
-    }
-    
-    public static function Encoding(string $_encoding)
-    {
-        return new Encoding($_encoding);
-    }
-    
-    public static function FileExists()
-    {
-        return new FileExists();
-    }
-    
-    public static function MaxFileSize(int $_size)
-    {
-        return new MaxFileSize($_size);
-    }
-    
-    public static function MimeType(string $_mimeType)
-    {
-        return new MimeType($_mimeType);
+        return new AnyOf($_constraints, $_errorMessage);
     }
 }

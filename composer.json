@@ -8,12 +8,20 @@
         }
     ],
     "require": {
-        "php": "^7.2"
+        "php": "^7.1"
     },
     "autoload": {
         "psr-4": {
             "Stefmachine\\Validation\\": "src/"
         }
     },
-    "license": "MIT"
+    "autoload-dev": {
+        "psr-4": {
+            "Stefmachine\\Validation\\Tests\\": "tests/"
+        }
+    },
+    "license": "MIT",
+    "require-dev": {
+        "phpunit/phpunit": "^9.5"
+    }
 }

@@ -4,48 +4,38 @@
 namespace Stefmachine\Validation\Constraint;
 
 
+use Stefmachine\Validation\Constraint\Traits\ErrorMessageTrait;
 use Stefmachine\Validation\ConstraintInterface;
-use Stefmachine\Validation\Errors;
+use Traversable;
+use UnexpectedValueException;
 
 class Each implements ConstraintInterface
 {
-    const NOT_ARRAY = 'not_array';
+    /** @var ConstraintInterface $constraint */
+    protected $constraint;
     
-    /** @var ConstraintInterface[] $constraints */
-    protected $constraints;
+    use ErrorMessageTrait;
     
-    public function __construct(array $_constraints = array())
+    public function __construct(ConstraintInterface $_constraint, ?string $_errorMessage = null)
     {
-        $this->constraints = array();
+        $this->constraint = $_constraint;
         
-        foreach ($_constraints as $constraint){
-            $this->add($constraint);
-        }
+        $this->setErrorMessage($_errorMessage);
     }
     
-    public function add(ConstraintInterface $_constraint)
+    public function validate($_value)
     {
-        $this->constraints[] = $_constraint;
-    }
-    
-    public function validate($_value): Errors
-    {
-        if(!is_array($_value) && !$_value instanceof \Traversable){
-            return Errors::from(self::NOT_ARRAY);
+        if(!is_array($_value) && !$_value instanceof Traversable){
+            throw new UnexpectedValueException("Value is not traversable.");
         }
         
-        $errors = Errors::none();
-        foreach ($_value as $index => $value){
-            foreach ($this->constraints as $constraint){
-                $errors->merge(
-                    $constraint->validate($value),
-                    "{$index}."
-                );
-                
-                break;
+        foreach ($_value as $value){
+            $error = $this->constraint->validate($value);
+            if($error !== true){
+                return $this->getError() ?: $error;
             }
         }
         
-        return $errors;
+        return true;
     }
 }

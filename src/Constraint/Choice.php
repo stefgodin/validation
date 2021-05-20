@@ -4,40 +4,40 @@
 namespace Stefmachine\Validation\Constraint;
 
 
+use Stefmachine\Validation\Constraint\Traits\ErrorMessageTrait;
 use Stefmachine\Validation\ConstraintInterface;
-use Stefmachine\Validation\Errors;
 
 class Choice implements ConstraintInterface
 {
-    const ERROR_CHOICE = 'invalid_choice';
-    
     /** @var array */
     protected $choices;
     /** @var bool */
     protected $loose;
     
-    public function __construct(array $_choices = array(), bool $_loose = false)
+    use ErrorMessageTrait;
+    
+    public function __construct(array $_choices, ?string $_errorMessage = null)
     {
-        $this->choices = array();
-        $this->loose = $_loose;
+        $this->choices = $_choices;
+        $this->loose = false;
         
-        foreach ($_choices as $choice){
-            $this->add($choice);
-        }
+        $this->setErrorMessage($_errorMessage);
     }
     
-    public function add($_choice)
+    public function loose(): Choice
     {
-        $this->choices[] = $_choice;
+        $this->loose = true;
         return $this;
     }
     
-    public function validate($_value): Errors
+    public function strict(): Choice
     {
-        if(in_array($_value, $this->choices, !$this->loose)){
-            return Errors::none();
-        }
-        
-        return Errors::from(self::ERROR_CHOICE);
+        $this->loose = false;
+        return $this;
+    }
+    
+    public function validate($_value)
+    {
+        return in_array($_value, $this->choices, !$this->loose) ?: $this->getError();
     }
 }

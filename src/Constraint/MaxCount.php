@@ -4,32 +4,34 @@
 namespace Stefmachine\Validation\Constraint;
 
 
+use Countable;
+use InvalidArgumentException;
+use Stefmachine\Validation\Constraint\Traits\ErrorMessageTrait;
 use Stefmachine\Validation\ConstraintInterface;
-use Stefmachine\Validation\Errors;
-use Stefmachine\Validation\Helper\ErrorMaker;
+use UnexpectedValueException;
 
 class MaxCount implements ConstraintInterface
 {
-    const ERROR_NOT_COUNTABLE = 'not_countable';
-    const ERROR_MAX_COUNT = 'max_count';
-    
     protected $maxCount;
     
-    public function __construct(int $_maxCount)
+    use ErrorMessageTrait;
+    
+    public function __construct(int $_maxCount, ?string $_errorMessage = null)
     {
+        if($_maxCount < 0){
+            throw new InvalidArgumentException("Max count cannot be less than 0.");
+        }
+        
         $this->maxCount = $_maxCount;
+        $this->setErrorMessage($_errorMessage);
     }
     
-    public function validate($_value): Errors
+    public function validate($_value)
     {
-        if(!is_array($_value) || $_value instanceof \Countable){
-            return Errors::from(self::ERROR_NOT_COUNTABLE);
+        if(!is_array($_value) && !$_value instanceof Countable){
+            throw new UnexpectedValueException("Value is not an array or countable.");
         }
         
-        if(count($_value) > $this->maxCount){
-            return Errors::from(ErrorMaker::makeError(self::ERROR_MAX_COUNT, ['max' => $this->maxCount]));
-        }
-        
-        return Errors::none();
+        return count($_value) <= $this->maxCount ?: $this->getError();
     }
 }

@@ -4,34 +4,47 @@
 namespace Stefmachine\Validation\Constraint;
 
 
+use InvalidArgumentException;
+use Stefmachine\Validation\Constraint\Traits\ErrorMessageTrait;
 use Stefmachine\Validation\ConstraintInterface;
-use Stefmachine\Validation\Errors;
-use Stefmachine\Validation\Helper\ErrorMaker;
+use UnexpectedValueException;
 
 class MaxLength implements ConstraintInterface
 {
-    const ERROR_MAX_LENGTH = 'max_length';
+    protected $maxLength;
+    protected $multiBytes;
     
-    protected $max;
+    use ErrorMessageTrait;
     
-    public function __construct(int $_max)
+    public function __construct(int $_maxLength, ?string $_errorMessage = null)
     {
-        $this->max = $_max;
+        if($_maxLength < 0){
+            throw new InvalidArgumentException("Max length cannot be less than 0.");
+        }
+        
+        $this->maxLength = $_maxLength;
+        $this->multiBytes = true;
+        $this->setErrorMessage($_errorMessage);
     }
     
-    public function validate($_value): Errors
+    public function singleByte(): MaxLength
     {
-        $errors = Assert::String()->validate($_value);
-        if($errors->any()){
-            return $errors;
+        $this->multiBytes = false;
+        return $this;
+    }
+    
+    public function multiByte(): MaxLength
+    {
+        $this->multiBytes = true;
+        return $this;
+    }
+    
+    public function validate($_value)
+    {
+        if(!is_string($_value)){
+            throw new UnexpectedValueException("Max length only accept string as values.");
         }
         
-        $length = strlen((string) $_value);
-        
-        if($length > $this->max){
-            return Errors::from(ErrorMaker::makeError(self::ERROR_MAX_LENGTH, ['max' => $this->max]));
-        }
-        
-        return Errors::none();
+        return ($this->multiBytes ? mb_strlen($_value) : strlen($_value)) <= $this->maxLength ?: $this->getError();
     }
 }

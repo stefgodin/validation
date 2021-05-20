@@ -4,35 +4,34 @@
 namespace Stefmachine\Validation\Constraint;
 
 
+use InvalidArgumentException;
+use Stefmachine\Validation\Constraint\Traits\ErrorMessageTrait;
 use Stefmachine\Validation\ConstraintInterface;
-use Stefmachine\Validation\Errors;
+use Stefmachine\Validation\ConstraintViolations;
+use UnexpectedValueException;
 
 class Regex implements ConstraintInterface
 {
-    const ERROR_STRING = 'invalid_string';
-    const ERROR_REGEX_MATCH = 'no_match';
-    
     protected $regex;
     
-    public function __construct(string $_regex)
+    use ErrorMessageTrait;
+    
+    public function __construct(string $_regex, ?string $_errorMessage = null)
     {
-        $this->regex = $_regex;
-        if(preg_match($this->regex, '') === false){
-            throw new \LogicException("Invalid regex given.");
+        if(@preg_match($_regex, '') === false){
+            throw new InvalidArgumentException("Invalid regex given.");
         }
+    
+        $this->regex = $_regex;
+        $this->setErrorMessage($_errorMessage);
     }
     
-    public function validate($_value): Errors
+    public function validate($_value)
     {
-        $match = preg_match($this->regex, $_value);
-        if($match === false){
-            return Errors::from(self::ERROR_STRING);
+        if(!is_string($_value)){
+            throw new UnexpectedValueException("Value is not a string.");
         }
-        
-        if($match === 0){
-            return Errors::from(self::ERROR_REGEX_MATCH);
-        }
-        
-        return Errors::none();
+    
+        return preg_match($this->regex, $_value) !== 0 ?: $this->getError();
     }
 }

@@ -4,19 +4,20 @@
 namespace Stefmachine\Validation\Constraint;
 
 
+use Stefmachine\Validation\Constraint\Traits\ErrorMessageTrait;
 use Stefmachine\Validation\ConstraintInterface;
-use Stefmachine\Validation\Errors;
 
 class NotNull implements ConstraintInterface
 {
-    const ERROR_NOT_NULL = 'required';
+    use ErrorMessageTrait;
     
-    public function validate($_value): Errors
+    public function __construct(?string $_errorMessage = null)
     {
-        if($_value === null){
-            return Errors::from(self::ERROR_NOT_NULL);
-        }
-        
-        return Errors::none();
+        $this->setErrorMessage($_errorMessage);
+    }
+    
+    public function validate($_value)
+    {
+        return $_value !== null ?: $this->getError();
     }
 }

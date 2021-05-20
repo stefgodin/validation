@@ -130,6 +130,19 @@ class AssertTest extends TestCase
     }
     
     /** @test */
+    public function Should_ReturnTypeInstance_When_UsingStringable()
+    {
+        $this->assertInstanceOf(Type::class, Assert::Stringable());
+    }
+    
+    /** @test */
+    public function Should_ReturnMessage_When_StringableIsInvalid()
+    {
+        $result = Assert::Stringable(self::ERROR_MESSAGE)->validate([]);
+        $this->assertEquals(self::ERROR_MESSAGE, $result);
+    }
+    
+    /** @test */
     public function Should_ReturnTypeInstance_When_UsingDouble()
     {
         $this->assertInstanceOf(Type::class, Assert::Double());
@@ -191,6 +204,32 @@ class AssertTest extends TestCase
     public function Should_ReturnMessage_When_ArrayIsInvalid()
     {
         $result = Assert::Array(self::ERROR_MESSAGE)->validate(null);
+        $this->assertEquals(self::ERROR_MESSAGE, $result);
+    }
+    
+    /** @test */
+    public function Should_ReturnTypeInstance_When_UsingTraversable()
+    {
+        $this->assertInstanceOf(Type::class, Assert::Traversable());
+    }
+    
+    /** @test */
+    public function Should_ReturnMessage_When_TraversableIsInvalid()
+    {
+        $result = Assert::Traversable(self::ERROR_MESSAGE)->validate(null);
+        $this->assertEquals(self::ERROR_MESSAGE, $result);
+    }
+    
+    /** @test */
+    public function Should_ReturnTypeInstance_When_UsingScalar()
+    {
+        $this->assertInstanceOf(Type::class, Assert::Scalar());
+    }
+    
+    /** @test */
+    public function Should_ReturnMessage_When_ScalarIsInvalid()
+    {
+        $result = Assert::Scalar(self::ERROR_MESSAGE)->validate(null);
         $this->assertEquals(self::ERROR_MESSAGE, $result);
     }
     

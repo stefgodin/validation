@@ -50,6 +50,11 @@ abstract class Assert
         return self::Type(Type::STRING, $_errorMessage);
     }
     
+    public static function Stringable(?string $_errorMessage = null): Type
+    {
+        return self::Type(Type::STRINGABLE, $_errorMessage);
+    }
+    
     public static function Double(?string $_errorMessage = null): Type
     {
         return self::Type(Type::DOUBLE, $_errorMessage);
@@ -73,6 +78,16 @@ abstract class Assert
     public static function Array(?string $_errorMessage = null): Type
     {
         return self::Type(Type::ARRAY, $_errorMessage);
+    }
+    
+    public static function Traversable(?string $_errorMessage = null): Type
+    {
+        return self::Type(Type::TRAVERSABLE, $_errorMessage);
+    }
+    
+    public static function Scalar(?string $_errorMessage = null): Type
+    {
+        return self::Type(Type::SCALAR, $_errorMessage);
     }
     
     public static function MinLength(int $_min, ?string $_errorMessage = null): MinLength

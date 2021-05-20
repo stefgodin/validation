@@ -23,7 +23,7 @@ class TypeTest extends TestCase
             'numeric_string' => '1.5',
             'array' => [],
             'traversable' => new class implements IteratorAggregate{
-    
+                
                 public function getIterator()
                 {
                     return [];
@@ -81,6 +81,20 @@ class TypeTest extends TestCase
     {
         $type = new Type(Type::STRING);
         $this->assertExclude($type, ['string', 'numeric_string'], false);
+    }
+    
+    /** @test */
+    public function Should_ReturnTrue_When_TypeIsStringableWithStringableValue()
+    {
+        $type = new Type(Type::STRINGABLE);
+        $this->assertInclude($type, ['null', 'bool', 'string', 'integer', 'float', 'numeric_string', 'stringable_object'], true);
+    }
+    
+    /** @test */
+    public function Should_ReturnFalse_When_TypeIsStringableWithNonStringableValue()
+    {
+        $type = new Type(Type::STRINGABLE);
+        $this->assertExclude($type, ['null', 'bool', 'string', 'integer', 'float', 'numeric_string', 'stringable_object'], false);
     }
     
     /** @test */

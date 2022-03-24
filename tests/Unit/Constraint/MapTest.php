@@ -167,6 +167,23 @@ class MapTest extends TestCase
     }
     
     /** @test */
+    public function Should_ReturnFalse_When_ExtraFieldsAreDisabledAndGivenFieldKeyIsNotSameType()
+    {
+        $map = new Map([
+            'one' => new ConstraintMock(true)
+        ]);
+        $map->disallowExtra();
+        
+        $input = [
+            0 => true,
+        ];
+        
+        $result = $map->validate($input);
+        
+        $this->assertFalse($result);
+    }
+    
+    /** @test */
     public function Should_ReturnTrue_When_ExtraFieldsAreAllowed()
     {
         $map = new Map([

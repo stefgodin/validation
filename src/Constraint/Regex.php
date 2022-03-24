@@ -7,7 +7,6 @@ namespace Stefmachine\Validation\Constraint;
 use InvalidArgumentException;
 use Stefmachine\Validation\Constraint\Traits\ErrorMessageTrait;
 use Stefmachine\Validation\ConstraintInterface;
-use Stefmachine\Validation\ConstraintViolations;
 use UnexpectedValueException;
 
 class Regex implements ConstraintInterface

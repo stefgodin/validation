@@ -20,7 +20,7 @@ class MaxTest extends TestCase
     }
     
     /** @test */
-    public function Should_ReturnTrue_When_ValueIsEqualToMax()
+    public function Should_ReturnTrue_When_ValueIsEqualToMaxAndMaxIsIncludedByDefault()
     {
         $max = new Max(5);
         $input = 5;
@@ -28,6 +28,30 @@ class MaxTest extends TestCase
         $result = $max->validate($input);
         
         $this->assertTrue($result);
+    }
+    
+    /** @test */
+    public function Should_ReturnTrue_When_ValueIsEqualToMaxAndMaxIsIncluded()
+    {
+        $max = new Max(5);
+        $max->includeMax();
+        $input = 5;
+        
+        $result = $max->validate($input);
+        
+        $this->assertTrue($result);
+    }
+    
+    /** @test */
+    public function Should_ReturnFalse_When_ValueIsEqualToMaxAndMaxIsExcluded()
+    {
+        $max = new Max(5);
+        $max->excludeMax();
+        $input = 5;
+        
+        $result = $max->validate($input);
+        
+        $this->assertFalse($result);
     }
     
     /** @test */

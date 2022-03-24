@@ -62,7 +62,7 @@ class Map implements ConstraintInterface
         $errors = [];
         $missingKeys = array_keys($this->constraints);
         foreach ($_value as $key => $value){
-            $index = array_search($key, $missingKeys);
+            $index = array_search($key, $missingKeys, true);
             if($index !== false){
                 unset($missingKeys[$index]);
     

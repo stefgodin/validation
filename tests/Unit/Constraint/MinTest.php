@@ -20,7 +20,7 @@ class MinTest extends TestCase
     }
     
     /** @test */
-    public function Should_ReturnTrue_When_ValueIsEqualToMin()
+    public function Should_ReturnTrue_When_ValueIsEqualToMinAndMinIsIncludedByDefault()
     {
         $min = new Min(0);
         $input = 0;
@@ -28,6 +28,30 @@ class MinTest extends TestCase
         $result = $min->validate($input);
         
         $this->assertTrue($result);
+    }
+    
+    /** @test */
+    public function Should_ReturnTrue_When_ValueIsEqualToMinAndMinIsIncluded()
+    {
+        $min = new Min(0);
+        $min->includeMin();
+        $input = 0;
+        
+        $result = $min->validate($input);
+        
+        $this->assertTrue($result);
+    }
+    
+    /** @test */
+    public function Should_ReturnFalse_When_ValueIsEqualToMinAndMinIsExcluded()
+    {
+        $min = new Min(0);
+        $min->excludeMin();
+        $input = 0;
+        
+        $result = $min->validate($input);
+        
+        $this->assertFalse($result);
     }
     
     /** @test */

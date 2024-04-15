@@ -10,6 +10,6 @@ class Email extends Regex implements ConstraintInterface
     public function __construct()
     {
         parent::__construct('/^.+\@\S+\.\S+$/');
-        $this->errorMessages[self::PATTERN_MISMATCH_ERROR] = 'The value is not a valid email.';
+        $this->setErrorMessage(self::PATTERN_MISMATCH_ERROR, 'The value is not a valid email.');
     }
 }

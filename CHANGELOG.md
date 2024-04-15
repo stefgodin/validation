@@ -2,7 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.5.0]
+## [unreleased]
+
+## [0.5.0] - 2024-04-15
 ### Added
 - ValidationReport and ValidationError classes to easily manage and receive information about errors thrown
 - New Callback validator receiving a user defined callback that returns true/false for success or failure

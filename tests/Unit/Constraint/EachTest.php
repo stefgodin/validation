@@ -1,62 +1,71 @@
 <?php
 
+
 namespace Stefmachine\Validation\Tests\Unit\Constraint;
 
 use PHPUnit\Framework\TestCase;
 use Stefmachine\Validation\Constraint\Each;
 use Stefmachine\Validation\Tests\Mock\ConstraintMock;
-use UnexpectedValueException;
 
 class EachTest extends TestCase
 {
     /** @test */
-    public function Should_ReturnTrue_When_EachElementIsValid()
+    public function Should_Succeed_When_EachElementIsValid()
     {
         $each = new Each(new ConstraintMock(true));
         
-        $result = $each->validate([true, true, true, true]);
+        $result = $each->validate(['', '', '']);
         
-        $this->assertTrue($result);
+        $this->assertTrue($result->isValid());
     }
     
     /** @test */
-    public function Should_ReturnFalse_When_OneElementIsInvalid()
+    public function Should_ContainError_When_OneElementIsInvalid()
+    {
+        $each = new Each(new ConstraintMock(false));
+        
+        $result = $each->validate(['']);
+        
+        $this->assertTrue($result->hasError());
+    }
+    
+    /** @test */
+    public function Should_ContainInvalidArrayError_When_ValueIsNotTraversable()
     {
         $each = new Each(new ConstraintMock(true));
         
-        $result = $each->validate([true, true, true, false]);
-    
-        $this->assertFalse($result);
+        $result = $each->validate('not an array');
+        
+        foreach($result->getErrors() as $error) {
+            $this->assertEquals(Each::INVALID_ARRAY_ERROR, $error->getUuid());
+        }
     }
     
     /** @test */
-    public function Should_ThrowException_When_ValueIsNotTraversable()
+    public function Should_ContainErrorMessages_When_Invalid()
     {
-        $this->expectException(UnexpectedValueException::class);
-        $each = new Each(new ConstraintMock(true));
+        $each = new Each(new ConstraintMock(false));
         
-        $each->validate('not an array');
+        $result = $each->validate(['', '']);
+        
+        foreach($result->getErrors() as $error) {
+            $this->assertEquals(ConstraintMock::ERROR, $error->getUuid());
+        }
+        
+        $this->assertCount(2, $result->getErrors());
     }
     
     /** @test */
-    public function Should_ReturnMessage_When_Invalid()
+    public function Should_MapSubErrorsWithKeyIndex_When_ConstraintIsFailing()
     {
-        $errorMessage = 'Some elements in the list are invalid.';
-        $each = new Each(new ConstraintMock(true), $errorMessage);
+        $map = new Each(new Each(new ConstraintMock(false)));
         
-        $result = $each->validate([true, true, true, false]);
+        $result = $map->validate([[null, null]]);
         
-        $this->assertEquals($errorMessage, $result);
-    }
-    
-    /** @test */
-    public function Should_ReturnConstraintMessage_When_Invalid()
-    {
-        $errorMessage = 'This element is not true.';
-        $each = new Each(new ConstraintMock(true, $errorMessage));
-        
-        $result = $each->validate([true, true, true, false]);
-        
-        $this->assertEquals($errorMessage, $result);
+        $this->assertCount(2, $result->getErrors());
+        foreach($result->getErrors() as $i => $error) {
+            $this->assertEquals(ConstraintMock::ERROR, $error->getUuid());
+            $this->assertEquals("[0][$i]", $error->getPath());
+        }
     }
 }

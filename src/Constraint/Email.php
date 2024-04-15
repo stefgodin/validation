@@ -3,15 +3,13 @@
 
 namespace Stefmachine\Validation\Constraint;
 
-
 use Stefmachine\Validation\ConstraintInterface;
 
 class Email extends Regex implements ConstraintInterface
 {
-    private const PATTERN = '/^.+\@\S+\.\S+$/';
-    
-    public function __construct(?string $_errorMessage = null)
+    public function __construct()
     {
-        parent::__construct(self::PATTERN, $_errorMessage);
+        parent::__construct('/^.+\@\S+\.\S+$/');
+        $this->errorMessages[self::PATTERN_MISMATCH_ERROR] = 'The value is not a valid email.';
     }
 }

@@ -1,5 +1,6 @@
 <?php
 
+
 namespace Stefmachine\Validation\Tests\Unit\Constraint;
 
 use InvalidArgumentException;
@@ -10,73 +11,55 @@ use Stefmachine\Validation\Tests\Mock\ConstraintMock;
 class AllOfTest extends TestCase
 {
     /** @test */
-    public function Should_ReturnTrue_When_AllConstraintsAreValid()
+    public function Should_Succeed_When_AllConstraintsAreValid()
     {
         $all = new AllOf([
             new ConstraintMock(true),
             new ConstraintMock(true),
         ]);
-        $input = true;
-    
-        $result = $all->validate($input);
         
-        $this->assertTrue($result);
+        $result = $all->validate('');
+        
+        $this->assertTrue($result->isValid());
     }
     
     /** @test */
-    public function Should_ReturnTrue_When_NoConstraintsGiven()
+    public function Should_Succeed_When_NoConstraintsGiven()
     {
         $all = new AllOf([]);
-        $input = true;
-    
-        $result = $all->validate($input);
-    
-        $this->assertTrue($result);
+        
+        $result = $all->validate('');
+        
+        $this->assertTrue($result->isValid());
     }
     
     /** @test */
-    public function Should_ReturnFalse_When_AnyConstraintIsInvalid()
+    public function Should_ContainError_When_AnyConstraintIsInvalid()
+    {
+        $all = new AllOf([
+            new ConstraintMock(true),
+            new ConstraintMock(false),
+            new ConstraintMock(true),
+        ]);
+        
+        $result = $all->validate('');
+        
+        $this->assertTrue($result->hasError());
+    }
+    
+    /** @test */
+    public function Should_ContainErrorMessage_When_AnyConstraintIsInvalid()
     {
         $all = new AllOf([
             new ConstraintMock(true),
             new ConstraintMock(false),
         ]);
-        $input = true;
-    
-        $result = $all->validate($input);
-    
-        $this->assertFalse($result);
-    }
-    
-    /** @test */
-    public function Should_ReturnMessage_When_AnyConstraintIsInvalid()
-    {
-        $errorMessage = 'The value is invalid.';
-        $all = new AllOf([
-            new ConstraintMock(true),
-            new ConstraintMock(false),
-        ], $errorMessage);
-        $input = true;
-    
-        $result = $all->validate($input);
-    
-        $this->assertEquals($errorMessage, $result);
-    }
-    
-    /** @test */
-    public function Should_ReturnFirstConstraintMessage_When_AnyConstraintIsInvalid()
-    {
-        $errorMessage = 'The value is invalid.';
-        $all = new AllOf([
-            new ConstraintMock(true, 'Value is not true.'),
-            new ConstraintMock(false, $errorMessage),
-            new ConstraintMock(null, 'Value is not null.'),
-        ]);
-        $input = true;
-    
-        $result = $all->validate($input);
-    
-        $this->assertEquals($errorMessage, $result);
+        
+        $result = $all->validate('');
+        
+        foreach($result->getErrors() as $error) {
+            $this->assertEquals(ConstraintMock::ERROR_MESSAGE, $error->getMessageTemplate());
+        }
     }
     
     /** @test */

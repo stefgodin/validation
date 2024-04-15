@@ -3,47 +3,33 @@
 
 namespace Stefmachine\Validation\Constraint;
 
-
 use InvalidArgumentException;
-use Stefmachine\Validation\Constraint\Traits\ErrorMessageTrait;
 use Stefmachine\Validation\ConstraintInterface;
+use Stefmachine\Validation\Report\ValidationReport;
 
 class AllOf implements ConstraintInterface
 {
-    /** @var ConstraintInterface[] */
-    protected $constraints;
-    
-    use ErrorMessageTrait;
-    
-    public function __construct(array $_constraints, ?string $_errorMessage = null)
+    /**
+     * @param ConstraintInterface[] $constraints
+     */
+    public function __construct(protected array $constraints)
     {
-        $this->constraints = array();
-        $this->setErrorMessage($_errorMessage);
-        
-        foreach ($_constraints as $constraint){
-            if(!$constraint instanceof ConstraintInterface){
-                throw new InvalidArgumentException("Expected array of ".ConstraintInterface::class.".");
+        foreach($this->constraints as $constraint) {
+            if(!$constraint instanceof ConstraintInterface) {
+                throw new InvalidArgumentException("Expected array of " . ConstraintInterface::class . ".");
             }
-            
-            $this->add($constraint);
         }
     }
     
-    private function add(ConstraintInterface $_constraint): AllOf
+    public function validate(mixed $value): ValidationReport
     {
-        $this->constraints[] = $_constraint;
-        return $this;
-    }
-    
-    public function validate($_value)
-    {
-        foreach ($this->constraints as $constraint){
-            $valid = $constraint->validate($_value);
-            if($valid !== true){
-                return $this->getError() ?: $valid;
+        foreach($this->constraints as $constraint) {
+            $report = $constraint->validate($value);
+            if($report->hasError()) {
+                return $report;
             }
         }
         
-        return true;
+        return new ValidationReport();
     }
 }

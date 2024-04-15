@@ -7,31 +7,39 @@ use Stefmachine\Validation\Constraint\Traits\ErrorMessageTrait;
 use Stefmachine\Validation\ConstraintInterface;
 use Stefmachine\Validation\Report\ValidationReport;
 
-class NotNull implements ConstraintInterface
+class Callback implements ConstraintInterface
 {
     use ErrorMessageTrait;
     
-    const IS_NULL_ERROR = 'ab27b044-89ec-4c42-928c-9289ee4654a9';
+    const INVALID_VALUE_ERROR = '84033c73-d9cb-4d5f-a083-a13445594f53';
     
     protected function getErrorName(string $uuid): string
     {
         return match ($uuid) {
-            self::IS_NULL_ERROR => 'IS_NULL_ERROR',
+            self::INVALID_VALUE_ERROR => 'INVALID_VALUE_ERROR',
         };
     }
     
     protected function getErrorMessage(string $uuid): string
     {
         return match ($uuid) {
-            self::IS_NULL_ERROR => 'The value must not be null.',
+            self::INVALID_VALUE_ERROR => 'The value is not valid.',
         };
+    }
+    
+    /** @var callable */
+    protected mixed $callback;
+    
+    public function __construct(callable $callback)
+    {
+        $this->callback = $callback;
     }
     
     public function validate(mixed $value): ValidationReport
     {
         $report = new ValidationReport();
-        if($value === null) {
-            $report->addError($this->newError(self::IS_NULL_ERROR));
+        if(!($this->callback)($value)) {
+            $report->addError($this->newError(self::INVALID_VALUE_ERROR));
         }
         return $report;
     }

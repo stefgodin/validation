@@ -3,48 +3,72 @@
 
 namespace Stefmachine\Validation\Constraint;
 
-
 use InvalidArgumentException;
 use Stefmachine\Validation\Constraint\Traits\ErrorMessageTrait;
 use Stefmachine\Validation\ConstraintInterface;
-use UnexpectedValueException;
+use Stefmachine\Validation\Report\ValidationReport;
+use Stringable;
 
 class MinLength implements ConstraintInterface
 {
-    protected $minLength;
-    protected $multiBytes;
-    
     use ErrorMessageTrait;
     
-    public function __construct(int $_min, ?string $_errorMessage = null)
+    const NOT_STRINGABLE_ERROR = 'dfedce91-3675-4b8d-9346-8a25fcd820a2';
+    const TOO_SHORT_ERROR = '724593bb-a68f-4208-96d2-e7b1332eb82b';
+    
+    protected function getErrorName(string $uuid): string
     {
-        if($_min < 0){
+        return match ($uuid) {
+            self::NOT_STRINGABLE_ERROR => 'NOT_STRINGABLE_ERROR',
+            self::TOO_SHORT_ERROR => 'TOO_SHORT_ERROR',
+        };
+    }
+    
+    protected function getErrorMessage(string $uuid): string
+    {
+        return match ($uuid) {
+            self::NOT_STRINGABLE_ERROR => 'The value cannot be converted to a string.',
+            self::TOO_SHORT_ERROR => 'The value must be at least {min} characters ({byte_mode}).',
+        };
+    }
+    
+    public function __construct(
+        protected int  $minLength,
+        protected bool $multiByte = true,
+    )
+    {
+        if($this->minLength < 0) {
             throw new InvalidArgumentException("Min length cannot be less than 0.");
         }
-        
-        $this->minLength = $_min;
-        $this->multiBytes = true;
-        $this->setErrorMessage($_errorMessage);
     }
     
     public function singleByte(): MinLength
     {
-        $this->multiBytes = false;
+        $this->multiByte = false;
         return $this;
     }
     
     public function multiByte(): MinLength
     {
-        $this->multiBytes = true;
+        $this->multiByte = true;
         return $this;
     }
     
-    public function validate($_value)
+    public function validate(mixed $value): ValidationReport
     {
-        if(!is_string($_value)){
-            throw new UnexpectedValueException("Value is not a string.");
+        $report = new ValidationReport();
+        if(!is_scalar($value) && !$value instanceof Stringable) {
+            return $report->addError($this->newError(self::NOT_STRINGABLE_ERROR));
         }
-    
-        return ($this->multiBytes ? mb_strlen($_value) : strlen($_value)) >= $this->minLength ?: $this->getError();
+        
+        $value = (string)$value;
+        if(($this->multiByte ? mb_strlen($value) : strlen($value)) < $this->minLength) {
+            $report->addError($this->newError(self::TOO_SHORT_ERROR, [
+                '{min}' => $this->minLength,
+                '{byte_mode}' => $this->multiByte ? 'Multi-Byte' : 'Single-Byte',
+            ]));
+        }
+        
+        return $report;
     }
 }

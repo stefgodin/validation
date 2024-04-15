@@ -3,30 +3,21 @@
 
 namespace Stefmachine\Validation\Constraint;
 
-
-use Stefmachine\Validation\Constraint\Traits\ErrorMessageTrait;
 use Stefmachine\Validation\ConstraintInterface;
+use Stefmachine\Validation\Report\ValidationReport;
 
 class Optional implements ConstraintInterface
 {
-    protected $constraint;
+    public function __construct(
+        protected ConstraintInterface $constraint,
+    ) {}
     
-    use ErrorMessageTrait;
-    
-    public function __construct(ConstraintInterface $_constraint, ?string $_errorMessage = null)
+    public function validate(mixed $value): ValidationReport
     {
-        $this->constraint = $_constraint;
-        
-        $this->setErrorMessage($_errorMessage);
-    }
-    
-    public function validate($_value)
-    {
-        if($_value === null){
-            return true;
+        if($value === null) {
+            return new ValidationReport();
         }
         
-        $constraintError = $this->constraint->validate($_value);
-        return $constraintError === true ?: $this->getError() ?: $constraintError;
+        return $this->constraint->validate($value);
     }
 }

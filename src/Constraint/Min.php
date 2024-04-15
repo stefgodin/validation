@@ -3,44 +3,65 @@
 
 namespace Stefmachine\Validation\Constraint;
 
-
 use Stefmachine\Validation\Constraint\Traits\ErrorMessageTrait;
 use Stefmachine\Validation\ConstraintInterface;
-use UnexpectedValueException;
+use Stefmachine\Validation\Report\ValidationReport;
 
 class Min implements ConstraintInterface
 {
-    protected $min;
-    protected $excluded;
-    
     use ErrorMessageTrait;
     
-    public function __construct(int $_min, ?string $_errorMessage = null)
+    const NOT_A_NUMBER_ERROR = 'f0eba344-f71a-4822-b244-7eb63efff1fb';
+    const TOO_LOW_ERROR = '379af6d0-5705-4ab6-addb-4ffb3fc7cc65';
+    
+    protected function getErrorName(string $uuid): string
     {
-        $this->min = $_min;
-        $this->excluded = false;
-        
-        $this->setErrorMessage($_errorMessage);
+        return match ($uuid) {
+            self::NOT_A_NUMBER_ERROR => 'NOT_A_NUMBER_ERROR',
+            self::TOO_LOW_ERROR => 'TOO_LOW_ERROR',
+        };
     }
+    
+    protected function getErrorMessage(string $uuid): string
+    {
+        return match ($uuid) {
+            self::NOT_A_NUMBER_ERROR => 'The value should be a number.',
+            self::TOO_LOW_ERROR => 'The value should be above {min} ({mode}).',
+        };
+    }
+    
+    public function __construct(
+        protected int|float $min,
+        protected bool      $inclusive = true,
+    ) {}
     
     public function excludeMin(): Min
     {
-        $this->excluded = true;
+        $this->inclusive = false;
         return $this;
     }
     
     public function includeMin(): Min
     {
-        $this->excluded = false;
+        $this->inclusive = true;
         return $this;
     }
     
-    public function validate($_value)
+    public function validate(mixed $value): ValidationReport
     {
-        if(!is_numeric($_value)){
-            throw new UnexpectedValueException("Value is not numeric.");
+        $report = new ValidationReport();
+        if(!is_numeric($value)) {
+            return $report->addError($this->newError(self::NOT_A_NUMBER_ERROR));
         }
         
-        return ($_value > $this->min || !$this->excluded && $_value == $this->min) ?: $this->getError();
+        $value = (float)$value;
+        if($this->inclusive ? ($value < $this->min) : ($value <= $this->min)) {
+            $report->addError($this->newError(self::TOO_LOW_ERROR, [
+                '{min}' => $this->min,
+                '{mode}' => $this->inclusive ? 'inclusive' : 'exclusive',
+            ]));
+        }
+        
+        return $report;
     }
 }

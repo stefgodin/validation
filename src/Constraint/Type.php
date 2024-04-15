@@ -3,14 +3,33 @@
 
 namespace Stefmachine\Validation\Constraint;
 
-
 use InvalidArgumentException;
 use Stefmachine\Validation\Constraint\Traits\ErrorMessageTrait;
 use Stefmachine\Validation\ConstraintInterface;
+use Stefmachine\Validation\Report\ValidationReport;
+use Stringable;
 use Traversable;
 
 class Type implements ConstraintInterface
 {
+    use ErrorMessageTrait;
+    
+    const INVALID_TYPE_ERROR = '90a2b646-c742-4f83-9dbb-6ac4decce68f';
+    
+    protected function getErrorName(string $uuid): string
+    {
+        return match ($uuid) {
+            self::INVALID_TYPE_ERROR => 'INVALID_TYPE_ERROR',
+        };
+    }
+    
+    protected function getErrorMessage(string $uuid): string
+    {
+        return match ($uuid) {
+            self::INVALID_TYPE_ERROR => 'The value is not a valid {type}.',
+        };
+    }
+    
     const BOOLEAN = 'bool';
     const STRING = 'string';
     const STRINGABLE = 'stringable';
@@ -35,38 +54,31 @@ class Type implements ConstraintInterface
         self::SCALAR,
     ];
     
-    protected $type;
-    
-    use ErrorMessageTrait;
-    
-    public function __construct(string $_type, ?string $_errorMessage = null)
+    public function __construct(
+        protected string $type,
+    )
     {
-        if(!in_array($_type, self::TYPES)){
-            throw new InvalidArgumentException(sprintf("Specified type must be one of %s.", implode(', ', self::TYPES)));
+        if(!in_array($this->type, self::TYPES)) {
+            throw new InvalidArgumentException(
+                sprintf("Specified type must be one of %s.", implode(', ', self::TYPES))
+            );
         }
-        
-        $this->type = $_type;
-        $this->setErrorMessage($_errorMessage);
     }
     
-    public function validate($_value)
+    public function validate(mixed $value): ValidationReport
     {
-        $function = "is_{$this->type}";
-        if (function_exists($function) && $function($_value) || gettype($_value) == $this->type) {
-            return true;
-        }
-        // Special case for object with __toString
-        elseif ($this->type == self::STRINGABLE
-            && ($_value === null
-                || is_scalar($_value)
-                || (is_object($_value) && method_exists($_value, '__toString')))){
-            return true;
-        }
-        // Special case for traversable
-        elseif($this->type === self::TRAVERSABLE && (is_array($_value) || $_value instanceof Traversable)){
-            return true;
+        $report = new ValidationReport();
+        $fn = "is_{$this->type}";
+        $valid = match ($this->type) {
+            self::STRINGABLE => $value === null || is_scalar($value) || $value instanceof Stringable,
+            self::TRAVERSABLE => is_array($value) || $value instanceof Traversable,
+            default => gettype($value) === $this->type || (function_exists($fn) && $fn($value))
+        };
+        
+        if(!$valid) {
+            $report->addError($this->newError(self::INVALID_TYPE_ERROR, ['{type}' => $this->type]));
         }
         
-        return $this->getError();
+        return $report;
     }
 }

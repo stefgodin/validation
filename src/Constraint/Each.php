@@ -3,39 +3,46 @@
 
 namespace Stefmachine\Validation\Constraint;
 
-
 use Stefmachine\Validation\Constraint\Traits\ErrorMessageTrait;
 use Stefmachine\Validation\ConstraintInterface;
+use Stefmachine\Validation\Report\ValidationReport;
 use Traversable;
-use UnexpectedValueException;
 
 class Each implements ConstraintInterface
 {
-    /** @var ConstraintInterface $constraint */
-    protected $constraint;
-    
     use ErrorMessageTrait;
     
-    public function __construct(ConstraintInterface $_constraint, ?string $_errorMessage = null)
+    const INVALID_ARRAY_ERROR = 'e2223267-fe96-484d-8b34-2a8ba1348437';
+    
+    protected function getErrorName(string $uuid): string
     {
-        $this->constraint = $_constraint;
-        
-        $this->setErrorMessage($_errorMessage);
+        return match ($uuid) {
+            self::INVALID_ARRAY_ERROR => 'INVALID_ARRAY_ERROR',
+        };
     }
     
-    public function validate($_value)
+    protected function getErrorMessage(string $uuid): string
     {
-        if(!is_array($_value) && !$_value instanceof Traversable){
-            throw new UnexpectedValueException("Value is not traversable.");
+        return match ($uuid) {
+            self::INVALID_ARRAY_ERROR => 'The value is not an array or traversable.',
+        };
+    }
+    
+    public function __construct(
+        protected ConstraintInterface $constraint,
+    ) {}
+    
+    public function validate(mixed $value): ValidationReport
+    {
+        $report = new ValidationReport();
+        if(!is_array($value) && !$value instanceof Traversable) {
+            return $report->addError($this->newError(self::INVALID_ARRAY_ERROR));
         }
         
-        foreach ($_value as $value){
-            $error = $this->constraint->validate($value);
-            if($error !== true){
-                return $this->getError() ?: $error;
-            }
+        foreach($value as $i => $v) {
+            $report->merge($this->constraint->validate($v), $i);
         }
         
-        return true;
+        return $report;
     }
 }

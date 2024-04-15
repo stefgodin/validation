@@ -1,5 +1,6 @@
 <?php
 
+
 namespace Stefmachine\Validation\Tests\Unit\Constraint;
 
 use InvalidArgumentException;
@@ -10,73 +11,56 @@ use Stefmachine\Validation\Tests\Mock\ConstraintMock;
 class AnyOfTest extends TestCase
 {
     /** @test */
-    public function Should_ReturnTrue_When_AnyConstraintIsValid()
+    public function Should_Succeed_When_AnyConstraintIsValid()
     {
         $any = new AnyOf([
             new ConstraintMock(true),
-            new ConstraintMock(null),
+            new ConstraintMock(false),
         ]);
-        $input = true;
         
-        $result = $any->validate($input);
+        $result = $any->validate('');
         
-        $this->assertTrue($result);
+        $this->assertTrue($result->isValid());
     }
     
     /** @test */
-    public function Should_ReturnTrue_When_NoConstraintsIsGiven()
+    public function Should_Succeed_When_NoConstraintsIsGiven()
     {
         $any = new AnyOf([]);
-        $input = true;
         
-        $result = $any->validate($input);
+        $result = $any->validate('');
         
-        $this->assertTrue($result);
+        $this->assertTrue($result->isValid());
     }
     
     /** @test */
-    public function Should_ReturnFalse_When_NoConstraintIsValid()
+    public function Should_ContainError_When_NoConstraintIsValid()
     {
         $any = new AnyOf([
             new ConstraintMock(false),
-            new ConstraintMock(null),
+            new ConstraintMock(false),
         ]);
-        $input = true;
         
-        $result = $any->validate($input);
+        $result = $any->validate('');
         
-        $this->assertFalse($result);
+        $this->assertTrue($result->hasError());
     }
     
     /** @test */
-    public function Should_ReturnMessage_When_NoConstraintIsValid()
+    public function Should_ContainErrorMessages_When_NoConstraintIsValid()
     {
-        $errorMessage = 'The value is invalid';
         $any = new AnyOf([
             new ConstraintMock(false),
-            new ConstraintMock(null),
-        ], $errorMessage);
-        $input = true;
-        
-        $result = $any->validate($input);
-        
-        $this->assertEquals($errorMessage, $result);
-    }
-    
-    /** @test */
-    public function Should_ReturnConcatenatedMessage_When_NoConstraintIsValid()
-    {
-        $message1 = 'The value is not false.';
-        $message2 = 'The value is not null.';
-        $any = new AnyOf([
-            new ConstraintMock(false, $message1),
-            new ConstraintMock(null, $message2),
+            new ConstraintMock(false),
         ]);
-        $input = true;
         
-        $result = $any->validate($input);
+        $result = $any->validate('');
         
-        $this->assertEquals("{$message1} {$message2}", $result);
+        foreach($result->getErrors() as $error) {
+            $this->assertEquals($error->getMessageTemplate(), ConstraintMock::ERROR_MESSAGE);
+        }
+        
+        $this->assertCount(2, $result->getErrors());
     }
     
     /** @test */

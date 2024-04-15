@@ -3,169 +3,178 @@
 
 namespace Stefmachine\Validation\Constraint;
 
-
 use Stefmachine\Validation\ConstraintInterface;
 
 abstract class Assert
 {
-    private function __construct(){}
+    private function __construct() {}
     
-    public static function Required(?string $_errorMessage = null): NotNull
+    public static function required(): NotNull
     {
-        return new NotNull($_errorMessage);
+        return new NotNull();
     }
     
-    public static function Optional(ConstraintInterface $_constraint, ?string $_errorMessage = null): Optional
+    public static function optional(ConstraintInterface $constraint): Optional
     {
-        return new Optional($_constraint, $_errorMessage);
+        return new Optional($constraint);
     }
     
-    public static function Choice(array $_choices, ?string $_errorMessage = null): Choice
+    public static function choice(array $choices): Choice
     {
-        return new Choice($_choices, $_errorMessage);
+        return new Choice($choices);
     }
     
-    public static function Equals($_value, ?string $_errorMessage = null): Choice
+    public static function equals($value): Choice
     {
-        return new Choice([$_value], $_errorMessage);
+        return new Choice([$value]);
     }
     
-    public static function Email(?string $_errorMessage = null): Email
+    public static function email(): Email
     {
-        return new Email($_errorMessage);
+        return new Email();
     }
     
-    public static function Type(string $_type, ?string $_errorMessage = null): Type
+    public static function type(string $type): Type
     {
-        return new Type($_type, $_errorMessage);
+        return new Type($type);
     }
     
-    public static function Boolean(?string $_errorMessage = null): Type
+    public static function boolean(): Type
     {
-        return self::Type(Type::BOOLEAN, $_errorMessage);
+        return self::type(Type::BOOLEAN);
     }
     
-    public static function String(?string $_errorMessage = null): Type
+    public static function string(): Type
     {
-        return self::Type(Type::STRING, $_errorMessage);
+        return self::type(Type::STRING);
     }
     
-    public static function Stringable(?string $_errorMessage = null): Type
+    public static function stringable(): Type
     {
-        return self::Type(Type::STRINGABLE, $_errorMessage);
+        return self::type(Type::STRINGABLE);
     }
     
-    public static function Double(?string $_errorMessage = null): Type
+    public static function double(): Type
     {
-        return self::Type(Type::DOUBLE, $_errorMessage);
+        return self::type(Type::DOUBLE);
     }
     
-    public static function Integer(?string $_errorMessage = null): Type
+    public static function integer(): Type
     {
-        return self::Type(Type::INTEGER, $_errorMessage);
+        return self::type(Type::INTEGER);
     }
     
-    public static function Float(?string $_errorMessage = null): Type
+    public static function float(): Type
     {
-        return self::Type(Type::FLOAT, $_errorMessage);
+        return self::type(Type::FLOAT);
     }
     
-    public static function Numeric(?string $_errorMessage = null): Type
+    public static function numeric(): Type
     {
-        return self::Type(Type::NUMERIC, $_errorMessage);
+        return self::type(Type::NUMERIC);
     }
     
-    public static function Array(?string $_errorMessage = null): Type
+    public static function array(): Type
     {
-        return self::Type(Type::ARRAY, $_errorMessage);
+        return self::type(Type::ARRAY);
     }
     
-    public static function Traversable(?string $_errorMessage = null): Type
+    public static function traversable(): Type
     {
-        return self::Type(Type::TRAVERSABLE, $_errorMessage);
+        return self::type(Type::TRAVERSABLE);
     }
     
-    public static function Scalar(?string $_errorMessage = null): Type
+    public static function scalar(): Type
     {
-        return self::Type(Type::SCALAR, $_errorMessage);
+        return self::type(Type::SCALAR);
     }
     
-    public static function MinLength(int $_min, ?string $_errorMessage = null): MinLength
+    public static function minLength(int $min): MinLength
     {
-        return new MinLength($_min, $_errorMessage);
+        return new MinLength($min);
     }
     
-    public static function MaxLength(int $_max, ?string $_errorMessage = null): MaxLength
+    public static function maxLength(int $max): MaxLength
     {
-        return new MaxLength($_max, $_errorMessage);
+        return new MaxLength($max);
     }
     
-    public static function Length(int $_min, int $_max, ?string $_errorMessage = null): AllOf
+    public static function length(int $min, int $max): AllOf
     {
-        return self::AllOf([
-            self::MinLength($_min),
-            self::MaxLength($_max)
-        ], $_errorMessage);
+        return self::allOf([
+            self::minLength($min),
+            self::maxLength($max),
+        ]);
     }
     
-    public static function Regex(string $_regex, ?string $_errorMessage = null): Regex
+    public static function regex(string $regex): Regex
     {
-        return new Regex($_regex, $_errorMessage);
+        return new Regex($regex);
     }
     
-    public static function Min(int $_min, ?string $_errorMessage = null): Min
+    public static function min(int $min): Min
     {
-        return new Min($_min, $_errorMessage);
+        return new Min($min);
     }
     
-    public static function Max(int $_max, ?string $_errorMessage = null): Max
+    public static function max(int $max): Max
     {
-        return new Max($_max, $_errorMessage);
+        return new Max($max);
     }
     
-    public static function Range(int $_min, int $_max, ?string $_errorMessage = null): AllOf
+    public static function range(int $min, int $max): AllOf
     {
-        return self::AllOf([
-            self::Min($_min),
-            self::Max($_max)
-        ], $_errorMessage);
+        return self::allOf([
+            self::min($min),
+            self::max($max),
+        ]);
     }
     
-    public static function MinCount(int $_min, ?string $_errorMessage = null): MinCount
+    public static function minCount(int $min): MinCount
     {
-        return new MinCount($_min, $_errorMessage);
+        return new MinCount($min);
     }
     
-    public static function MaxCount(int $_max, ?string $_errorMessage = null): MaxCount
+    public static function maxCount(int $max): MaxCount
     {
-        return new MaxCount($_max, $_errorMessage);
+        return new MaxCount($max);
     }
     
-    public static function WithinCount(int $_min, int $_max, ?string $_errorMessage = null): AllOf
+    public static function withinCount(int $min, int $max): AllOf
     {
-        return Assert::AllOf([
-            Assert::MinCount($_min),
-            Assert::MaxCount($_max)
-        ], $_errorMessage);
+        return Assert::allOf([
+            Assert::minCount($min),
+            Assert::maxCount($max),
+        ]);
     }
     
-    public static function Map(array $_map, ?string $_errorMessage = null): Map
+    public static function map(array $map): Map
     {
-        return new Map($_map, $_errorMessage);
+        return new Map($map);
     }
     
-    public static function Each(ConstraintInterface $_constraint, ?string $_errorMessage = null): Each
+    public static function each(ConstraintInterface $constraint): Each
     {
-        return new Each($_constraint, $_errorMessage);
+        return new Each($constraint);
     }
     
-    public static function AllOf(array $_constraints, ?string $_errorMessage = null): AllOf
+    public static function allOf(array $constraints): AllOf
     {
-        return new AllOf($_constraints, $_errorMessage);
+        return new AllOf($constraints);
     }
     
-    public static function AnyOf(array $_constraints, ?string $_errorMessage = null): AnyOf
+    public static function anyOf(array $constraints): AnyOf
     {
-        return new AnyOf($_constraints, $_errorMessage);
+        return new AnyOf($constraints);
+    }
+    
+    public static function callback(callable $callback): Callback
+    {
+        return new Callback($callback);
+    }
+    
+    public static function dateFormat(string $format): DateFormat
+    {
+        return new DateFormat($format);
     }
 }

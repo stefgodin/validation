@@ -3,46 +3,34 @@
 
 namespace Stefmachine\Validation\Tests\Unit\Constraint;
 
-
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
+use stdClass;
 use Stefmachine\Validation\Constraint\Regex;
-use UnexpectedValueException;
 
 class RegexTest extends TestCase
 {
     /** @test */
-    public function Should_ReturnTrue_When_ValueMatchesRegex()
+    public function Should_Succeed_When_ValueMatchesRegex()
     {
         $regex = new Regex('/^abcdefg$/');
-        $input = 'abcdefg';
+        $result = $regex->validate('abcdefg');
         
-        $result = $regex->validate($input);
-        
-        $this->assertTrue($result);
+        $this->assertTrue($result->isValid());
     }
     
     /** @test */
-    public function Should_ReturnFalse_When_ValueMismatchRegex()
+    public function Should_ContainPatternMismatchError_When_ValueMismatchRegex()
     {
         $regex = new Regex('/^abcdefg$/');
         $input = 'gfedcba';
-    
+        
         $result = $regex->validate($input);
-    
-        $this->assertFalse($result);
-    }
-    
-    /** @test */
-    public function Should_ReturnMessage_When_ValueMismatchRegex()
-    {
-        $errorMessage = 'Value does not matche regex.';
-        $regex = new Regex('/^abcdefg$/', $errorMessage);
-        $input = 'gfedcba';
-    
-        $result = $regex->validate($input);
-    
-        $this->assertEquals($errorMessage, $result);
+        
+        $this->assertCount(1, $result->getErrors());
+        foreach($result->getErrors() as $error) {
+            $this->assertEquals(Regex::PATTERN_MISMATCH_ERROR, $error->getUuid());
+        }
     }
     
     /** @test */
@@ -54,13 +42,15 @@ class RegexTest extends TestCase
     }
     
     /** @test */
-    public function Should_ThrowException_When_ValueIsNotString()
+    public function Should_ContainNonStringableError_When_ValueIsNotString()
     {
-        $this->expectException(UnexpectedValueException::class);
-        
         $regex = new Regex('/^abcdefg$/');
-        $input = null;
         
-        $regex->validate($input);
+        $result = $regex->validate(new stdClass());
+        
+        $this->assertCount(1, $result->getErrors());
+        foreach($result->getErrors() as $error) {
+            $this->assertEquals(Regex::NOT_STRINGABLE_ERROR, $error->getUuid());
+        }
     }
 }

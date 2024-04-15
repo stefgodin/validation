@@ -3,26 +3,34 @@
 
 namespace Stefmachine\Validation\Constraint;
 
-
 use Stefmachine\Validation\Constraint\Traits\ErrorMessageTrait;
 use Stefmachine\Validation\ConstraintInterface;
+use Stefmachine\Validation\Report\ValidationReport;
 
 class Choice implements ConstraintInterface
 {
-    /** @var array */
-    protected $choices;
-    /** @var bool */
-    protected $loose;
-    
     use ErrorMessageTrait;
     
-    public function __construct(array $_choices, ?string $_errorMessage = null)
+    const INVALID_CHOICE_ERROR = '28ef3894-53f4-4b79-9c39-61bd3e88a0e1';
+    
+    protected function getErrorName(string $uuid): string
     {
-        $this->choices = $_choices;
-        $this->loose = false;
-        
-        $this->setErrorMessage($_errorMessage);
+        return match ($uuid) {
+            self::INVALID_CHOICE_ERROR => 'INVALID_CHOICE_ERROR',
+        };
     }
+    
+    protected function getErrorMessage(string $uuid): string
+    {
+        return match ($uuid) {
+            self::INVALID_CHOICE_ERROR => 'The selected value is not a valid choice.',
+        };
+    }
+    
+    public function __construct(
+        protected array $choices,
+        protected bool  $loose = false,
+    ) {}
     
     public function loose(): Choice
     {
@@ -36,8 +44,13 @@ class Choice implements ConstraintInterface
         return $this;
     }
     
-    public function validate($_value)
+    public function validate(mixed $value): ValidationReport
     {
-        return in_array($_value, $this->choices, !$this->loose) ?: $this->getError();
+        $report = new ValidationReport();
+        if(!in_array($value, $this->choices, !$this->loose)) {
+            $report->addError($this->newError(self::INVALID_CHOICE_ERROR));
+        }
+        
+        return $report;
     }
 }

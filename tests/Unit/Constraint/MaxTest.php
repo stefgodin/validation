@@ -1,37 +1,37 @@
 <?php
 
+
 namespace Stefmachine\Validation\Tests\Unit\Constraint;
 
 use PHPUnit\Framework\TestCase;
 use Stefmachine\Validation\Constraint\Max;
-use UnexpectedValueException;
 
 class MaxTest extends TestCase
 {
     /** @test */
-    public function Should_ReturnTrue_When_ValueIsBellowMax()
+    public function Should_Succeed_When_ValueIsBellowMax()
     {
         $max = new Max(5);
         $input = 0;
         
         $result = $max->validate($input);
         
-        $this->assertTrue($result);
+        $this->assertTrue($result->isValid());
     }
     
     /** @test */
-    public function Should_ReturnTrue_When_ValueIsEqualToMaxAndMaxIsIncludedByDefault()
+    public function Should_Succeed_When_ValueIsEqualToMaxAndMaxIsIncludedByDefault()
     {
         $max = new Max(5);
         $input = 5;
         
         $result = $max->validate($input);
         
-        $this->assertTrue($result);
+        $this->assertTrue($result->isValid());
     }
     
     /** @test */
-    public function Should_ReturnTrue_When_ValueIsEqualToMaxAndMaxIsIncluded()
+    public function Should_Succeed_When_ValueIsEqualToMaxAndMaxIsIncluded()
     {
         $max = new Max(5);
         $max->includeMax();
@@ -39,11 +39,11 @@ class MaxTest extends TestCase
         
         $result = $max->validate($input);
         
-        $this->assertTrue($result);
+        $this->assertTrue($result->isValid());
     }
     
     /** @test */
-    public function Should_ReturnFalse_When_ValueIsEqualToMaxAndMaxIsExcluded()
+    public function Should_ContainTooHighError_When_ValueIsEqualToMaxAndMaxIsExcluded()
     {
         $max = new Max(5);
         $max->excludeMax();
@@ -51,38 +51,36 @@ class MaxTest extends TestCase
         
         $result = $max->validate($input);
         
-        $this->assertFalse($result);
+        $this->assertCount(1, $result->getErrors());
+        foreach($result->getErrors() as $error) {
+            $this->assertEquals(Max::TOO_HIGH_ERROR, $error->getUuid());
+        }
     }
     
     /** @test */
-    public function Should_ReturnFalse_When_ValueIsAboveMax()
+    public function Should_ContainTooHighError_When_ValueIsAboveMax()
     {
         $max = new Max(5);
         $input = 6;
         
         $result = $max->validate($input);
         
-        $this->assertFalse($result);
+        $this->assertCount(1, $result->getErrors());
+        foreach($result->getErrors() as $error) {
+            $this->assertEquals(Max::TOO_HIGH_ERROR, $error->getUuid());
+        }
     }
     
     /** @test */
-    public function Should_ReturnMessage_When_ValueIsInvalid()
+    public function Should_ContainNotANumberError_When_ValueIsNotNumeric()
     {
-        $errorMessage = "Value is over max.";
-        $max = new Max(5, $errorMessage);
-        $input = 6;
-        
-        $result = $max->validate($input);
-        
-        $this->assertEquals($errorMessage, $result);
-    }
-    
-    /** @test */
-    public function Should_ThrowException_When_ValueIsNotNumeric()
-    {
-        $this->expectException(UnexpectedValueException::class);
-        
         $max = new Max(5);
-        $max->validate(null);
+        
+        $result = $max->validate(null);
+        
+        $this->assertCount(1, $result->getErrors());
+        foreach($result->getErrors() as $error) {
+            $this->assertEquals(Max::NOT_A_NUMBER_ERROR, $error->getUuid());
+        }
     }
 }

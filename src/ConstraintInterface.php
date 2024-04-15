@@ -3,15 +3,9 @@
 
 namespace Stefmachine\Validation;
 
-
-use UnexpectedValueException;
+use Stefmachine\Validation\Report\ValidationReport;
 
 interface ConstraintInterface
 {
-    /**
-     * @param $_value
-     * @return bool|string
-     * @throws UnexpectedValueException
-     */
-    public function validate($_value);
+    public function validate(mixed $value): ValidationReport;
 }

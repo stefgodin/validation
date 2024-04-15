@@ -1,10 +1,10 @@
 <?php
 
+
 namespace Stefmachine\Validation\Tests\Unit\Constraint;
 
 use PHPUnit\Framework\TestCase;
 use Stefmachine\Validation\Constraint\Email;
-use UnexpectedValueException;
 
 class EmailTest extends TestCase
 {
@@ -12,7 +12,7 @@ class EmailTest extends TestCase
     
     protected function setUp(): void
     {
-        $this->emails = array(
+        $this->emails = [
             'valid' => [
                 'email@example.com',
                 'firstname.lastname@example.com',
@@ -34,8 +34,8 @@ class EmailTest extends TestCase
                 'email.example.com',
                 'email@example.com (Joe Smith)',
                 'email@example',
-            ]
-        );
+            ],
+        ];
     }
     
     /** @test */
@@ -43,9 +43,9 @@ class EmailTest extends TestCase
     {
         $email = new Email();
         
-        foreach ($this->emails['valid'] as $input){
+        foreach($this->emails['valid'] as $input) {
             $result = $email->validate($input);
-            $this->assertTrue($result, "Failed to succeed on email value '{$input}'.");
+            $this->assertTrue($result->isValid(), "Failed to succeed on email value '{$input}'.");
         }
     }
     
@@ -53,31 +53,36 @@ class EmailTest extends TestCase
     public function Should_ReturnFalse_When_StringIsInvalidEmail()
     {
         $email = new Email();
-    
-        foreach ($this->emails['invalid'] as $input){
+        
+        foreach($this->emails['invalid'] as $input) {
             $result = $email->validate($input);
-            $this->assertFalse($result, "Failed to fail on email value '{$input}'.");
+            $this->assertTrue($result->hasError(), "Failed to fail on email value '{$input}'.");
         }
     }
     
     /** @test */
-    public function Should_ReturnMessage_When_Invalid()
+    public function Should_ContainInvalidPatternError_When_Invalid()
     {
-        $errorMessage = "Invalid email address.";
-        $email = new Email($errorMessage);
+        $email = new Email();
         
         $result = $email->validate("");
         
-        $this->assertEquals($errorMessage, $result);
+        $this->assertCount(1, $result->getErrors());
+        foreach($result->getErrors() as $error) {
+            $this->assertEquals(Email::PATTERN_MISMATCH_ERROR, $error->getUuid());
+        }
     }
     
     /** @test */
     public function Should_ThrowException_When_ValueIsNotString()
     {
-        $this->expectException(UnexpectedValueException::class);
-        
         $email = new Email();
         
-        $email->validate(null);
+        $result = $email->validate(null);
+        
+        $this->assertCount(1, $result->getErrors());
+        foreach($result->getErrors() as $error) {
+            $this->assertEquals(Email::NOT_STRINGABLE_ERROR, $error->getUuid());
+        }
     }
 }

@@ -1,16 +1,18 @@
 <?php
 
+
 namespace Stefmachine\Validation\Tests\Unit\Constraint;
 
-
+use ArrayIterator;
 use InvalidArgumentException;
+use Iterator;
 use IteratorAggregate;
 use PHPUnit\Framework\TestCase;
 use Stefmachine\Validation\Constraint\Type;
 
 class TypeTest extends TestCase
 {
-    protected $testValues;
+    protected array $testValues;
     
     protected function setUp(): void
     {
@@ -22,36 +24,36 @@ class TypeTest extends TestCase
             'float' => 1.5,
             'numeric_string' => '1.5',
             'array' => [],
-            'traversable' => new class implements IteratorAggregate{
+            'traversable' => new class implements IteratorAggregate {
                 
-                public function getIterator()
+                public function getIterator(): Iterator
                 {
-                    return [];
+                    return new ArrayIterator([]);
                 }
             },
-            'stringable_object' => new class(){
+            'stringable_object' => new class() {
                 public function __toString()
                 {
                     return 'I\'m like a string';
                 }
             },
-            'object' => new class(){}
+            'object' => new class ( ) { },
         ];
     }
     
-    private function assertInclude(Type $_type, array $_include, $_assert)
+    private function assertInclude(Type $type, array $include, $assert)
     {
-        $inputs = array_intersect_key($this->testValues, array_flip($_include));
-        foreach ($inputs as $type => $value){
-            $this->assertEquals($_assert, $_type->validate($value), "Value of type {$type} did not meet expectations.");
+        $inputs = array_intersect_key($this->testValues, array_flip($include));
+        foreach($inputs as $t => $value) {
+            $this->assertEquals($assert, $type->validate($value)->isValid(), "Value of type {$t} did not meet expectations.");
         }
     }
     
-    private function assertExclude(Type $_type, array $_exclude, $_assert)
+    private function assertExclude(Type $type, array $exclude, $assert)
     {
-        $inputs = array_diff_key($this->testValues, array_flip($_exclude));
-        foreach ($inputs as $type => $value){
-            $this->assertEquals($_assert, $_type->validate($value), "Value of type {$type} did not meet expectations.");
+        $inputs = array_diff_key($this->testValues, array_flip($exclude));
+        foreach($inputs as $t => $value) {
+            $this->assertEquals($assert, $type->validate($value)->isValid(), "Value of type {$t} did not meet expectations.");
         }
     }
     
@@ -196,14 +198,16 @@ class TypeTest extends TestCase
     }
     
     /** @test */
-    public function Should_ReturnMessage_When_Invalid()
+    public function Should_ContainInvalidTypeError_When_Invalid()
     {
-        $message = "The value must be a string";
-        $type = new Type(Type::STRING, $message);
+        $type = new Type(Type::STRING);
         
         $result = $type->validate($this->testValues['integer']);
         
-        $this->assertEquals($message, $result);
+        $this->assertCount(1, $result->getErrors());
+        foreach($result->getErrors() as $error) {
+            $this->assertEquals(Type::INVALID_TYPE_ERROR, $error->getUuid());
+        }
     }
     
     /** @test */

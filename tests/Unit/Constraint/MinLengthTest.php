@@ -1,101 +1,84 @@
 <?php
 
+
 namespace Stefmachine\Validation\Tests\Unit\Constraint;
 
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
+use stdClass;
 use Stefmachine\Validation\Constraint\MinLength;
-use UnexpectedValueException;
 
 class MinLengthTest extends TestCase
 {
     /** @test */
-    public function Should_ReturnTrue_When_SingleByteStringLengthGreaterThanMin()
+    public function Should_Succeed_When_SingleByteStringLengthGreaterThanMin()
     {
         $minLength = new MinLength(3);
-        $input = "Abcd";
+        $result = $minLength->validate("Abcd");
         
-        $result = $minLength->validate($input);
-        
-        $this->assertTrue($result);
+        $this->assertTrue($result->isValid());
     }
     
     /** @test */
-    public function Should_ReturnTrue_When_SingleByteStringLengthEqualToMin()
+    public function Should_Succeed_When_SingleByteStringLengthEqualToMin()
     {
         $minLength = new MinLength(3);
-        $input = "Abc";
+        $result = $minLength->validate("Abc");
         
-        $result = $minLength->validate($input);
-        
-        $this->assertTrue($result);
+        $this->assertTrue($result->isValid());
     }
     
     /** @test */
-    public function Should_ReturnFalse_When_SingleByteStringLengthLessThanMin()
+    public function Should_ContainTooShortError_When_SingleByteStringLengthLessThanMin()
     {
         $minLength = new MinLength(3);
-        $input = "Ab";
+        $result = $minLength->validate("Ab");
         
-        $result = $minLength->validate($input);
-        
-        $this->assertFalse($result);
+        $this->assertCount(1, $result->getErrors());
+        foreach($result->getErrors() as $error) {
+            $this->assertEquals(MinLength::TOO_SHORT_ERROR, $error->getUuid());
+        }
     }
     
     /** @test */
-    public function Should_ReturnTrue_When_MultiByteStringLengthGreaterThanMin()
+    public function Should_Succeed_When_MultiByteStringLengthGreaterThanMin()
     {
         $minLength = new MinLength(3);
-        $input = "ÉÈÔÎ";
+        $result = $minLength->validate("ÉÈÔÎ");
         
-        $result = $minLength->validate($input);
-        
-        $this->assertTrue($result);
+        $this->assertTrue($result->isValid());
     }
     
     /** @test */
-    public function Should_ReturnTrue_When_MultiByteStringLengthEqualToMin()
+    public function Should_Succeed_When_MultiByteStringLengthEqualToMin()
     {
         $minLength = new MinLength(3);
-        $input = "ÉÈÔ";
+        $result = $minLength->validate("ÉÈÔ");
         
-        $result = $minLength->validate($input);
-        
-        $this->assertTrue($result);
+        $this->assertTrue($result->isValid());
     }
     
     /** @test */
-    public function Should_ReturnFalse_When_MultiByteStringLengthLessThanMin()
+    public function Should_ContainTooShortError_When_MultiByteStringLengthLessThanMin()
     {
         $minLength = new MinLength(3);
-        $input = "ÉÈ";
+        $result = $minLength->validate("ÉÈ");
         
-        $result = $minLength->validate($input);
-        
-        $this->assertFalse($result);
+        $this->assertCount(1, $result->getErrors());
+        foreach($result->getErrors() as $error) {
+            $this->assertEquals(MinLength::TOO_SHORT_ERROR, $error->getUuid());
+        }
     }
     
     /** @test */
-    public function Should_ReturnTrue_When_MultiByteStringLengthGreaterThanMinSingleByte()
+    public function Should_Succeed_When_MultiByteStringLengthGreaterThanMinSingleByte()
     {
         $minLength = (new MinLength(3))->singleByte();
-        $input = "AÉ"; // In single byte it should compare to 3
         
-        $result = $minLength->validate($input);
+        // In single byte it should compare to 3
+        $result = $minLength->validate("AÉ");
         
-        $this->assertTrue($result);
-    }
-    
-    /** @test */
-    public function Should_ReturnMessage_When_Invalid()
-    {
-        $errorMessage = "Must be greater than or equal to 3.";
-        $minLength = new MinLength(3, $errorMessage);
-        $input = "Ab";
-    
-        $result = $minLength->validate($input);
-    
-        $this->assertEquals($errorMessage, $result);
+        $this->assertTrue($result->isValid());
     }
     
     /** @test */
@@ -127,12 +110,15 @@ class MinLengthTest extends TestCase
     }
     
     /** @test */
-    public function Should_ThrowException_When_NonString()
+    public function Should_ContainNotStringableError_When_NonString()
     {
-        $this->expectException(UnexpectedValueException::class);
-        
         $minLength = new MinLength(3);
         
-        $minLength->validate(1);
+        $result = $minLength->validate(new stdClass());
+        
+        $this->assertCount(1, $result->getErrors());
+        foreach($result->getErrors() as $error) {
+            $this->assertEquals(MinLength::NOT_STRINGABLE_ERROR, $error->getUuid());
+        }
     }
 }

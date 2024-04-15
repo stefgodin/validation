@@ -3,61 +3,32 @@ The Assert class is a container for every implemented validation and some mixins
 
 Here is a basic usage example:
 ```php
-$value = 'This is right';
-$valid = Assert::Length(1, 16)->validate($value);
+$report = Assert::length(1, 16)->validate('This is right');
 
-if(!$valid){
-    // The validation failed...
-}
-
-$errorMessage = Assert::Length(1, 16, 'Value is of the wrong length.')->validate($value);
-
-if($errorMessage !== true){
-    // The validation failed...
-    echo $errorMessage; // Value is of the wrong length.
+if($report->isValid()){
+    // The validation succeeded...
 }
 ```
 
-Some validations allow for more complex constructs such as associative arrays.
+Some validations allow for more complex constructs such as associative arrays or forms.
 ```php
-$value = array(
-    'foo' => 'hello',
-    'bar' => 4
-);
-$valid = Assert::map([
-    'foo' => Assert::Required(),
-    'bar' => Assert::Range(0, 5)
-])->validate($value);
+$report = Assert::map([
+    'age' => Assert::allOf([
+        Assert::required(),
+        Assert::integer(),
+        Assert::range(0, 128)
+    ]),
+    'name' => Assert::allOf([
+        Assert::required(),
+        Assert::string(),
+        Assert::length(1, 50)
+    ])
+])->validate($_POST);
 
-if(!$valid){
-    // The validation failed...
-}
-```
-
-Here are some others:
-```php
-
-$value = 4;
-$valid = Assert::AllOf([
-    Assert::Required(),
-    Assert::Numeric(),
-    Assert::Range(0, 5)
-])->validate($value);
-// Every validation needs to succeed
-
-if(!$valid){
-    // The validation failed...
-}
-```
-```php
-$value = 23;
-$valid = Assert::AnyOf([
-    Assert::Numeric(),
-    Assert::String()
-])->validate($value);
-// Only one validation needs to succeed
-
-if(!$valid){
-    // The validation failed...
+if($report->hasError()){
+    foreach($report->getErrors() as $error){
+        echo $error->getMessage(); // A descriptive message of the error
+        echo $error->getPath(); // The property that contains this error
+    }
 }
 ```

@@ -2,7 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
-## [unreleased]
+## [0.6.0] - 2024-04-24
+### Changed
+- Map constraint can now allow specific missing fields when using Map::allowMissing(\['field'])
+- Map constraint can now allow specific extra fields when using Map::allowExtra(\['field'])
+- Map no longer sends null to validator when missing a field with allowMissing
 
 ## [0.5.0] - 2024-04-15
 ### Added

@@ -48,10 +48,11 @@ class MapTest extends TestCase
     /** @test */
     public function Should_ContainError_When_AnyElementIsMissingAndMissingKeyIsDisabled()
     {
-        $map = (new Map([
+        $map = new Map([
             'one' => new ConstraintMock(true),
             'two' => new ConstraintMock(true),
-        ]))->disallowMissing();
+        ]);
+        $map->disallowMissing();
         
         $result = $map->validate(['one' => '']);
         
@@ -59,7 +60,7 @@ class MapTest extends TestCase
     }
     
     /** @test */
-    public function Should_ContainMissingKeyError_When_AnyMissingElementIsMissingWithDefaultMissingKeySetting()
+    public function Should_ContainMissingKeyError_When_AnyElementIsMissingWithDefaultMissingKeySetting()
     {
         $map = new Map([
             'one' => new ConstraintMock(true),
@@ -76,12 +77,58 @@ class MapTest extends TestCase
     }
     
     /** @test */
+    public function Should_Succeed_When_AnyElementIsMissingAndMissingKeyIsEnabled()
+    {
+        $map = new Map([
+            'one' => new ConstraintMock(false),
+        ]);
+        $map->allowMissing();
+        
+        $input = [];
+        
+        $result = $map->validate($input);
+        $this->assertTrue($result->isValid());
+    }
+    
+    /** @test */
+    public function Should_Succeed_When_SpecificElementIsMissingAndMissingSpecificKeyIsEnabled()
+    {
+        $map = new Map([
+            'one' => new ConstraintMock(true),
+        ]);
+        $map->allowMissing(['one']);
+        
+        $input = [];
+        
+        $result = $map->validate($input);
+        $this->assertTrue($result->isValid());
+    }
+    
+    /** @test */
     public function Should_ContainMissingKeyError_When_AnyMissingElementIsMissingWithMissingKeyDisabled()
     {
         $map = new Map([
             'one' => new ConstraintMock(true),
         ]);
         $map->disallowMissing();
+        
+        $input = [];
+        
+        $result = $map->validate($input);
+        
+        $this->assertCount(1, $result->getErrors());
+        foreach($result->getErrors() as $error) {
+            $this->assertEquals(Map::MISSING_KEY_ERROR, $error->getUuid());
+        }
+    }
+    
+    /** @test */
+    public function Should_ContainMissingKeyError_When_AnyMissingElementIsMissingWithSpecificMissingKeyEnabled()
+    {
+        $map = new Map([
+            'one' => new ConstraintMock(true),
+        ]);
+        $map->allowMissing(['two']);
         
         $input = [];
         
@@ -176,7 +223,46 @@ class MapTest extends TestCase
     }
     
     /** @test */
-    public function Should_ReturnTrue_When_ExtraFieldsAreAllowedAndNoConstrainsGiven()
+    public function Should_Succeed_When_SpecificExtraFieldsAreAllowed()
+    {
+        $map = new Map([
+            'one' => new ConstraintMock(true),
+        ]);
+        $map->allowExtra(['two']);
+        
+        $input = [
+            'one' => true,
+            'two' => false,
+        ];
+        
+        $result = $map->validate($input);
+        
+        $this->assertTrue($result->isValid());
+    }
+    
+    /** @test */
+    public function Should_ContainError_When_SpecificExtraFieldsAreAllowedButGivenExtraFieldIsNotInList()
+    {
+        $map = new Map([
+            'one' => new ConstraintMock(true),
+        ]);
+        $map->allowExtra(['two']);
+        
+        $input = [
+            'one' => true,
+            'three' => false,
+        ];
+        
+        $result = $map->validate($input);
+        
+        $this->assertCount(1, $result->getErrors());
+        foreach($result->getErrors() as $error) {
+            $this->assertEquals(Map::EXTRA_KEY_ERROR, $error->getUuid());
+        }
+    }
+    
+    /** @test */
+    public function Should_Succeed_When_ExtraFieldsAreAllowedAndNoConstrainsGiven()
     {
         $map = new Map([]);
         $map->allowExtra();

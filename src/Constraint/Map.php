@@ -39,9 +39,9 @@ class Map implements ConstraintInterface
      * @param ConstraintInterface[] $map
      */
     public function __construct(
-        protected array $map,
-        protected bool  $allowExtra = false,
-        protected bool  $allowMissing = false,
+        protected array      $map,
+        protected array|null $allowExtra = [],
+        protected array      $allowMissing = [],
     )
     {
         foreach($this->map as $validation) {
@@ -51,28 +51,26 @@ class Map implements ConstraintInterface
         }
     }
     
-    public function allowExtra(): Map
+    public function allowExtra(array|null $_keys = null): Map
     {
-        $this->allowExtra = true;
+        $this->allowExtra = $_keys;
         return $this;
     }
     
     public function disallowExtra(): Map
     {
-        $this->allowExtra = false;
-        return $this;
+        return $this->allowExtra([]);
     }
     
-    public function allowMissing(): Map
+    public function allowMissing(array|null $_keys = null): Map
     {
-        $this->allowMissing = true;
+        $this->allowMissing = $_keys ?? array_keys($this->map);
         return $this;
     }
     
     public function disallowMissing(): Map
     {
-        $this->allowMissing = false;
-        return $this;
+        return $this->allowMissing([]);
     }
     
     public function validate(mixed $value): ValidationReport
@@ -89,15 +87,13 @@ class Map implements ConstraintInterface
                 unset($missingKeys[$index]);
                 
                 $report->merge($this->map[$key]->validate($v), $key);
-            } else if(!$this->allowExtra) {
+            } else if(is_array($this->allowExtra) && !in_array($key, $this->allowExtra, true)) {
                 $report->addError($this->newError(self::EXTRA_KEY_ERROR, ['{key}' => $key]));
             }
         }
         
         foreach($missingKeys as $key) {
-            if($this->allowMissing) {
-                $report->merge($this->map[$key]->validate(null), $key);
-            } else {
+            if(!in_array($key, $this->allowMissing, true)) {
                 $report->addError($this->newError(self::MISSING_KEY_ERROR, ['{key}' => $key]));
             }
         }

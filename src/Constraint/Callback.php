@@ -5,6 +5,7 @@ namespace Stefmachine\Validation\Constraint;
 
 use Stefmachine\Validation\Constraint\Traits\ErrorMessageTrait;
 use Stefmachine\Validation\ConstraintInterface;
+use Stefmachine\Validation\Report\ValidationError;
 use Stefmachine\Validation\Report\ValidationReport;
 
 class Callback implements ConstraintInterface
@@ -38,8 +39,12 @@ class Callback implements ConstraintInterface
     public function validate(mixed $value): ValidationReport
     {
         $report = new ValidationReport();
-        if(!($this->callback)($value)) {
-            $report->addError($this->newError(self::INVALID_VALUE_ERROR));
+        $result = ($this->callback)($value);
+        if($result !== true) {
+            if(!$result instanceof ValidationError) {
+                $result = $this->newError(self::INVALID_VALUE_ERROR);
+            }
+            $report->addError($result);
         }
         return $report;
     }

@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.1] - 2024-04-30
+### Changed
+- Callback's callback can now return a ValidationError to customize validation errors
+
 ## [0.6.0] - 2024-04-24
 ### Changed
 - Map constraint can now allow specific missing fields when using Map::allowMissing(\['field'])

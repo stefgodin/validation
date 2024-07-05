@@ -41,10 +41,13 @@ class Callback implements ConstraintInterface
         $report = new ValidationReport();
         $result = ($this->callback)($value);
         if($result !== true) {
-            if(!$result instanceof ValidationError) {
-                $result = $this->newError(self::INVALID_VALUE_ERROR);
+            if($result instanceof ValidationReport) {
+                $report->merge($result);
+            } else if($result instanceof ValidationError) {
+                $report->addError($result);
+            } else {
+                $report->addError($this->newError(self::INVALID_VALUE_ERROR));
             }
-            $report->addError($result);
         }
         return $report;
     }

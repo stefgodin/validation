@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.2] - 2024-07-05
+- Callback's callback can now return a ValidationReport to return many errors and allow easy nesting of other asserts
+
 ## [0.6.1] - 2024-04-30
 ### Changed
 - Callback's callback can now return a ValidationError to customize validation errors
